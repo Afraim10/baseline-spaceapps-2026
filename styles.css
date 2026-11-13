@@ -1,0 +1,102 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #182b3a;
+  background: #f4f2ed;
+  line-height: 1.6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.site-shell {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 8vw, 6rem) clamp(1.25rem, 5vw, 3rem);
+}
+
+.eyebrow,
+.status-label {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.75rem, 10vw, 6rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.intro {
+  margin: 1.25rem 0 0;
+  max-width: 38rem;
+  color: #435561;
+  font-size: 1.125rem;
+}
+
+.prototype-banner {
+  margin: 2rem 0 0;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid #987018;
+  background: #fff0c9;
+  color: #49380f;
+  font-weight: 600;
+}
+
+.evidence {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #bac3c6;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.status-label {
+  border: 1px solid currentColor;
+  padding: 0.2rem 0.5rem;
+}
+
+#claims-status,
+footer {
+  color: #435561;
+}
+
+#claims-list {
+  padding-left: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+#claims-list li + li {
+  margin-top: 0.75rem;
+}
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #bac3c6;
+  font-size: 0.875rem;
+}
