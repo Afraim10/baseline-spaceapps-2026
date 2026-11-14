@@ -1,0 +1,232 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 240 520"
+     role="group"
+     aria-labelledby="body-title body-desc">
+
+  <title id="body-title">BASELINE physiological body schematic</title>
+  <desc id="body-desc">
+    Geometric front-facing human silhouette with three
+    interactive anatomical zones: head and neuro,
+    thorax and cardio, and abdomen and pelvis.
+  </desc>
+
+  <style>
+    .silhouette {
+      fill: var(--bg-surface-muted, #E8EEF2);
+      stroke: var(--border-strong, #7C91A2);
+      stroke-width: 1.5;
+      stroke-linejoin: round;
+    }
+
+    .zone {
+      fill: var(--body-zone-fill, #D5DEE6);
+      stroke: var(--border-strong, #7C91A2);
+      stroke-width: 1.5;
+      stroke-linejoin: round;
+      cursor: pointer;
+      transition: fill 150ms ease, stroke 150ms ease;
+    }
+
+    .zone.is-active {
+      fill: var(--brand-tint, #E8F2F6);
+      stroke: var(--brand-primary, #155F7A);
+      stroke-width: 2.5;
+    }
+
+    .zone:focus-visible {
+      stroke: var(--focus-ring, #155F7A);
+      stroke-width: 3;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .zone {
+        transition: none;
+      }
+    }
+  </style>
+
+  <!-- Neutral human silhouette -->
+
+  <g id="body-base" class="silhouette">
+
+    <!-- Head -->
+    <path d="
+      M120 22
+      C98 22 83 39 83 62
+      C83 84 98 99 120 99
+      C142 99 157 84 157 62
+      C157 39 142 22 120 22
+      Z
+    "/>
+
+    <!-- Neck -->
+    <path d="
+      M104 91
+      L136 91
+      L140 128
+      L100 128
+      Z
+    "/>
+
+    <!-- Left arm -->
+    <path d="
+      M68 125
+      C56 130 50 143 47 159
+      L30 222
+      C27 234 32 243 42 246
+      C51 248 58 242 61 232
+      L79 169
+      L91 137
+      Z
+    "/>
+
+    <!-- Right arm -->
+    <path d="
+      M172 125
+      C184 130 190 143 193 159
+      L210 222
+      C213 234 208 243 198 246
+      C189 248 182 242 179 232
+      L161 169
+      L149 137
+      Z
+    "/>
+
+    <!-- Torso and pelvis silhouette -->
+    <path d="
+      M96 108
+      C80 111 68 123 62 137
+      C56 151 59 171 62 187
+      L74 244
+      C77 261 87 270 103 273
+      L97 349
+      C96 361 87 371 78 379
+      L84 390
+      L156 390
+      L162 379
+      C153 371 144 361 143 349
+      L137 273
+      C153 270 163 261 166 244
+      L178 187
+      C181 171 184 151 178 137
+      C172 123 160 111 144 108
+      Z
+    "/>
+
+    <!-- Left leg -->
+    <path d="
+      M92 365
+      C89 389 86 416 84 440
+      L81 478
+      C80 487 85 492 93 492
+      H110
+      C116 492 119 487 118 479
+      L124 414
+      L120 371
+      Z
+    "/>
+
+    <!-- Right leg -->
+    <path d="
+      M148 365
+      C151 389 154 416 156 440
+      L159 478
+      C160 487 155 492 147 492
+      H130
+      C124 492 121 487 122 479
+      L116 414
+      L120 371
+      Z
+    "/>
+
+    <!-- Left foot -->
+    <path d="
+      M85 486
+      H110
+      C116 486 120 491 120 499
+      V503
+      H72
+      V498
+      C73 491 78 486 85 486
+      Z
+    "/>
+
+    <!-- Right foot -->
+    <path d="
+      M130 486
+      H155
+      C162 486 167 491 168 498
+      V503
+      H120
+      V499
+      C120 491 124 486 130 486
+      Z
+    "/>
+
+  </g>
+
+  <!-- Zone 1: Head / Neuro -->
+
+  <g id="zone-neuro"
+     class="zone"
+     role="button"
+     tabindex="0"
+     aria-label="Head and neuro zone. Sleep hours and mood.">
+
+    <path d="
+      M120 22
+      C98 22 83 39 83 62
+      C83 84 98 99 120 99
+      C142 99 157 84 157 62
+      C157 39 142 22 120 22
+      Z
+    "/>
+
+  </g>
+
+  <!-- Zone 2: Thorax / Cardio -->
+
+  <g id="zone-cardio"
+     class="zone"
+     role="button"
+     tabindex="0"
+     aria-label="Thorax and cardio zone. Blood pressure and heart rate.">
+
+    <path d="
+      M96 124
+      C83 126 75 137 75 153
+      L83 226
+      C85 241 98 249 120 250
+      C142 249 155 241 157 226
+      L165 153
+      C165 137 157 126 144 124
+      C136 121 128 120 120 120
+      C112 120 104 121 96 124
+      Z
+    "/>
+
+  </g>
+
+  <!-- Zone 3: Systemic / Metabolic -->
+
+  <g id="zone-systemic"
+     class="zone"
+     role="button"
+     tabindex="0"
+     aria-label="Systemic and metabolic zone. Blood glucose and core temperature.">
+
+    <path d="
+      M84 250
+      C94 257 106 260 120 260
+      C134 260 146 257 156 250
+      L150 337
+      C148 353 158 368 169 378
+      C152 384 136 389 120 389
+      C104 389 88 384 71 378
+      C82 368 92 353 90 337
+      Z
+    "/>
+
+  </g>
+
+</svg>

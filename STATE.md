@@ -1,35 +1,37 @@
 # STATE.md — BASELINE (NASA Space Apps 2026)
 
-**Last Updated:** Sat Nov 14, 2026 — 08:58 EET (Saturday Hour 9)
-**Current Phase:** Sat 2–10h UI Shell, Data Schema, Body Figure & Charts (Closing window — transition to Sat 10–16h Content Verification imminent)
-**Repository:** `baseline-spaceapps-2026`
+**Last Updated:** Sat Nov 14, 2026 — 15:13 EET (Saturday Hour 15)
+**Current Phase:** Transitioning from Design Freeze -> Immediate Code Build & NASA HRP Content Verification
+**Repository:** `baseline-spaceapps-2026` (Local workspace: `C:\baseline`)
 
 ## Done
 - Challenge scope, MVP vs. Stretch vs. Out-of-Scope boundaries locked.
-- Plain static HTML/CSS/JS + vendored assets architecture established.
-- **Design System v1.0 locked:** Clinical light theme (`#F3F6F8` canvas, `#FFFFFF` cards, `#142536` text, `#155F7A` primary teal-blue), accessible Green/Amber/Red deviation tokens, Inter + IBM Plex Mono typography scale, and component specs.
-- **Scientific Hazard Mapping locked:**
-  - *Radiation:* Explicitly unmapped to acute vital changes (avoids false dosimetry claims).
-  - *Isolation & Confinement:* Sleep Hours, Mood (primary circadian/behavioral context).
-  - *Distance from Earth:* All 6 indicators (operational autonomy & escalation preparedness, not direct physiological causation).
-  - *Gravity Fields:* Blood Pressure, Heart Rate (cephalad fluid shifts, cardiovascular deconditioning).
-  - *Hostile Closed Environments:* Sleep Hours, Mood (primary); Blood Glucose (secondary metabolic/circadian context).
+- Plain static HTML/CSS/JS + inline SVG architecture locked (zero build step, zero unpinned CDNs, `file://` + GitHub Pages safe).
+- **Design System v1.0 & Brand Identity Locked:**
+  - Clinical light palette (`#F3F6F8` canvas, `#FFFFFF` cards, `#142536` banner/ink, `#155F7A` primary accent) and accessible Green/Amber/Red status tokens.
+  - Finalized circular astronaut-pulse emblem (`baseline_logo.jpg`) — requires quick transparent PNG export (`assets/baseline-logo.png`) and AI-generated watermark label.
+- **Scientific Hazard Mapping Locked:**
+  - *Radiation:* Explicitly unmapped to vital signs (avoids false dosimetry claims).
+  - *Isolation & Confinement:* Sleep Hours, Mood.
+  - *Distance from Earth:* All 6 indicators (operational autonomy & escalation readiness).
+  - *Gravity Fields:* Blood Pressure, Heart Rate.
+  - *Hostile Closed Environments:* Sleep Hours, Mood (primary); Blood Glucose (secondary).
 
 ## In Progress
-- Simplifying the circular astronaut-pulse emblem into a flat, non-AI vector SVG mark for the header and favicon.
-- Implementing the static UI shell (`index.html`, `styles.css`, `app.js`) and atomic `data/claims.js` schema.
+- Exporting `baseline_logo.jpg` with transparent background (`assets/baseline-logo.png`) + AI watermark disclosure.
+- Handing off locked technical/design specification to Claude for architectural check and Kilo CLI for code generation in `C:\baseline`.
+- Preparing atomic `data/claims.js` entries for manual NASA HRP verification.
 
 ## Blocked
-- Production text rendering in indicator cards remains intentionally gated on manual source verification (`verified: true`) scheduled for Sat 10–16h.
+- Production card guidance (`Why measured`, `How measured in flight`, `Preventive actions`, `When to escalate`) remains gated on Afraim's manual source verification (`verified: true`).
 
 ## Decisions Needed
-1. **Logo Execution:** Confirm flat SVG trace for UI/favicon (and watermark label if using the raster ChatGPT emblem in demo slides).
-2. **Charting Implementation:** Confirm zero-dependency inline `<svg>` trend charts (with personal baseline shaded band) vs. vendored `chart.umd.min.js` so no time is lost on library configuration.
+- Confirm initial personal-baseline deviation thresholds in the Claude/Kilo code pass (HR/Glucose/Sleep `%` bands vs. absolute deltas for BP, Core Temp, and Mood).
 
 ## Risks
-- **Timebox Slippage (High):** It is 08:58 AM Saturday (Hour 9). Any additional time spent in Photoshop cuts directly into the Sat 10–16h NASA HRP literature verification window.
-- **AI Watermark Non-Compliance (Medium):** Using the unwatermarked ChatGPT emblem directly in public deliverables risks violating 2026 Space Apps media rules.
-- **Verification Bottleneck (High):** Keep claims atomic (`1 claim = 1 fact` in `data/claims.js`) so verified cards render immediately as you check HRP sources.
+- **Schedule Slippage (High):** Now at Saturday 15:13 EET (~5 hours behind original scaffolding/UI schedule). Must cut all stretch goals (environment selector, OSDR dataset) until core MVP + verified HRP claims are deployed live on GitHub Pages.
+- **Verification Bottleneck (High):** Keep `data/claims.js` strictly atomic (`1 claim = 1 fact`) so verified cards populate incrementally as NASA HRP sources are checked.
+- **AI Watermark Compliance (Low-Medium):** Ensure `baseline_logo.jpg` / `assets/baseline-logo.png` carries a visible AI-generated label per 2026 Space Apps guide rules.
 
 ## Claims Inventory
 - **Total Claims:** 0
