@@ -28,7 +28,7 @@
     }
 
     .zone.is-active {
-      fill: var(--brand-tint, #E8F2F6);
+      fill: rgba(21,95,122,0.28);
       stroke: var(--brand-primary, #155F7A);
       stroke-width: 2.5;
     }
@@ -171,6 +171,7 @@
      class="zone"
      role="button"
      tabindex="0"
+     aria-pressed="false"
      aria-label="Head and neuro zone. Sleep hours and mood.">
 
     <path d="
@@ -190,6 +191,7 @@
      class="zone"
      role="button"
      tabindex="0"
+     aria-pressed="false"
      aria-label="Thorax and cardio zone. Blood pressure and heart rate.">
 
     <path d="
@@ -213,7 +215,8 @@
      class="zone"
      role="button"
      tabindex="0"
-     aria-label="Systemic and metabolic zone. Blood glucose and core temperature.">
+     aria-pressed="false"
+     aria-label="Systemic and metabolic zone. Blood glucose and body temperature.">
 
     <path d="
       M84 250

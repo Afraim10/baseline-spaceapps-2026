@@ -25,7 +25,7 @@
       demo: [94, 98, 96, 101, 97, 95, 96]
     },
     {
-      id: "core-temperature", label: "Core Temperature", unit: "\u00b0C",
+      id: "core-temperature", label: "Body Temperature", unit: "\u00b0C",
       baseline: { value: 36.6, unit: "\u00b0C" },
       demo: [36.5, 36.6, 36.7, 36.6, 36.8, 36.6, 36.6],
       thresholds: "Green <=0.4 C; Amber >0.4 to <1.0 C; Red >=1.0 C."
@@ -48,8 +48,23 @@
     ["prevent", "Preventive actions"], ["escalate", "When to escalate"]
   ];
   const sections = new Set(["why", "how", "prevent", "escalate", "hazard-link", "reference"]);
-  const hazards = new Set(["radiation", "isolation", "distance", "gravity", "closed-environment"]);
-  const tiers = new Set(["primary", "secondary", "operational"]);
+  const hazards = new Set(["radiation", "isolation", "distance", "gravity", "closed-environment", "all"]);
+  const tierLabels = {
+    primary: "Primary physiological context",
+    secondary: "Secondary/contextual association",
+    operational: "Operational relevance"
+  };
+  const tiers = new Set(Object.keys(tierLabels));
+  const bases = new Set(["source", "interpretation"]);
+  const zones = {
+    neuro: { label: "Head / Neuro", indicators: ["sleep-hours", "mood"] },
+    cardio: { label: "Thorax / Cardio", indicators: ["blood-pressure", "heart-rate"] },
+    systemic: { label: "Systemic / Metabolic", indicators: ["blood-glucose", "core-temperature"] }
+  };
+  const hazardButtons = [...document.querySelectorAll(".hazard-button")];
+  const zoneControls = [...document.querySelectorAll("#body-schematic [data-zone], .zone-controls [data-zone]")];
+  let selectedHazard = "all";
+  let selectedZone = null;
   const sourceById = new Map();
   const duplicateSourceIds = new Set();
   for (const source of sources) {
@@ -105,8 +120,13 @@
     }
     if (claim.hazard !== null && !hazards.has(claim.hazard)) issues.push("hazard must be a configured ID or null.");
     if (claim.tier !== null && !tiers.has(claim.tier)) issues.push("tier must be primary, secondary, operational, or null.");
-    if (claim.section === "hazard-link" && (!hazards.has(claim.hazard) || !tiers.has(claim.tier))) {
-      issues.push("hazard-link requires both a hazard and a relationship tier.");
+    if (!bases.has(claim.basis)) issues.push("basis must be source or interpretation.");
+    if (typeof claim.note !== "string") issues.push("note must be a string.");
+    if (claim.basis === "interpretation" && !nonEmpty(claim.note)) {
+      issues.push("interpretation claims require a non-empty note.");
+    }
+    if (claim.section === "hazard-link" && (!hazards.has(claim.hazard) || !tiers.has(claim.tier) || !bases.has(claim.basis))) {
+      issues.push("hazard-link requires hazard, tier, and basis.");
     }
     return issues;
   }
@@ -121,7 +141,7 @@
     get("claims-unverified").textContent = String(claims.length - verifiedClaims.length);
     get("sources-total").textContent = String(sources.length);
     get("claims-status").textContent = displayClaims.length
-      ? `${displayClaims.length} verified claim(s) have complete display metadata. Unverified claims remain hidden.`
+      ? `${displayClaims.length} verified claim(s) have complete display metadata. Drafts never populate guidance, references, or hazard associations.`
       : "No verified claims available for display.";
     const usedIds = new Set(displayClaims.map((claim) => claim.source_id));
     const list = get("sources-used");
@@ -150,6 +170,24 @@
     issueList.replaceChildren();
     issueList.hidden = issues.length === 0;
     for (const issue of issues) issueList.append(element("li", "", issue));
+    const drafts = claims.filter((claim) => claim && claim.verified !== true);
+    const draftList = get("dev-drafts");
+    draftList.replaceChildren();
+    draftList.hidden = drafts.length === 0;
+    get("dev-drafts-status").textContent = drafts.length
+      ? `${drafts.length} draft claim(s). Development preview only; not source-verified.`
+      : "No draft claims loaded.";
+    for (const claim of drafts) {
+      const item = element("li");
+      item.append(
+        element("p", "draft-badge", "DRAFT - NOT VERIFIED"),
+        element("p", "", nonEmpty(claim.text) ? claim.text : "(empty draft)"),
+        element("p", "metadata", `ID: ${claim.id || "(missing)"}; indicator: ${claim.indicator || "(missing)"}; section: ${claim.section || "(missing)"}; hazard: ${claim.hazard || "(none)"}; tier: ${claim.tier || "(none)"}; basis: ${claim.basis || "(missing)"}.`),
+        element("p", "metadata", `Source ID: ${claim.source_id || "(missing)"}; locator: ${claim.locator || "(missing)"}.`)
+      );
+      if (nonEmpty(claim.note)) item.append(element("p", "metadata", claim.note));
+      draftList.append(item);
+    }
   }
 
   function createDemo(now) {
@@ -235,6 +273,33 @@
     card.querySelector(".deviation").textContent = formatDeviation(indicator, result);
   }
 
+  function claimItem(claim) {
+    const source = sourceById.get(claim.source_id);
+    const item = element("li");
+    if (claim.section === "hazard-link") {
+      item.append(element("p", "related-badge", `RELATED TO SELECTED HAZARD \u00b7 ${tierLabels[claim.tier]}`));
+    }
+    item.append(element("p", "", claim.text));
+    if (claim.basis === "interpretation") {
+      const note = element("div", "interpretation-note");
+      note.setAttribute("role", "note");
+      note.append(
+        element("p", "interpretation-label", claim.section === "hazard-link"
+          ? "Interface association \u2014 not stated by the cited source."
+          : "Author interpretation \u2014 not stated by the cited source."),
+        element("p", "", claim.note)
+      );
+      item.append(note);
+    }
+    const citation = element("p", "metadata claim-citation");
+    const link = element("a", "", source.title);
+    link.href = sourceHref(source);
+    link.rel = "noopener noreferrer";
+    citation.append(link, document.createTextNode(` \u00b7 ${claim.locator}`));
+    item.append(citation);
+    return item;
+  }
+
   function claimSection(indicator, section, title, emptyText, openSections) {
     const details = element("details", "guidance-section");
     details.dataset.section = section;
@@ -246,20 +311,68 @@
       return details;
     }
     const list = element("ul", "claim-list");
-    for (const claim of matches) {
-      const source = sourceById.get(claim.source_id);
-      const item = element("li");
-      item.append(element("p", "", claim.text));
-      const citation = element("p", "metadata claim-citation");
-      const link = element("a", "", source.title);
-      link.href = sourceHref(source);
-      link.rel = "noopener noreferrer";
-      citation.append(link, document.createTextNode(` \u00b7 ${claim.locator}`));
-      item.append(citation);
-      list.append(item);
-    }
+    for (const claim of matches) list.append(claimItem(claim));
     details.append(list);
     return details;
+  }
+
+  function renderHazardAssociations() {
+    const links = displayClaims.filter((claim) => claim.section === "hazard-link" && claim.hazard === selectedHazard);
+    for (const button of hazardButtons) button.setAttribute("aria-pressed", String(button.dataset.hazard === selectedHazard));
+    const hazardName = hazardButtons.find((button) => button.dataset.hazard === selectedHazard).textContent;
+    get("hazard-association-status").textContent = links.length
+      ? `${links.length} verified association record(s) loaded for ${hazardName}.`
+      : "No source-verified associations loaded for this hazard.";
+    get("radiation-design-note").hidden = selectedHazard !== "radiation";
+    for (const indicator of indicators) {
+      const card = get(`card-${indicator.id}`);
+      const matches = links.filter((claim) => claim.indicator === indicator.id);
+      card.classList.toggle("is-hazard-related", matches.length > 0);
+      const panel = card.querySelector(".hazard-links");
+      panel.replaceChildren();
+      panel.hidden = matches.length === 0;
+      if (matches.length) {
+        const list = element("ul", "claim-list");
+        for (const claim of matches) list.append(claimItem(claim));
+        panel.append(list);
+      }
+    }
+  }
+
+  function updateZoneEmphasis() {
+    const selected = selectedZone ? zones[selectedZone].indicators : [];
+    for (const indicator of indicators) {
+      get(`card-${indicator.id}`).classList.toggle("is-zone-selected", selected.includes(indicator.id));
+    }
+  }
+
+  function selectZone(key) {
+    if (!Object.hasOwn(zones, key)) return;
+    selectedZone = selectedZone === key ? null : key;
+    for (const control of zoneControls) {
+      const active = control.dataset.zone === selectedZone;
+      control.setAttribute("aria-pressed", String(active));
+      control.classList.toggle("is-active", active);
+    }
+    updateZoneEmphasis();
+    const actions = get("zone-indicator-actions");
+    actions.replaceChildren();
+    actions.hidden = selectedZone === null;
+    get("zone-selection-status").textContent = selectedZone
+      ? `${zones[selectedZone].label} grouping selected. Choose an indicator to view, or select the grouping again to clear.`
+      : "All six indicator cards remain available. No grouping is emphasized.";
+    if (!selectedZone) return;
+    for (const id of zones[selectedZone].indicators) {
+      const button = element("button", "", `View ${indicatorById.get(id).label}`);
+      button.type = "button";
+      button.dataset.indicator = id;
+      button.addEventListener("click", () => {
+        const card = get(`card-${id}`);
+        card.scrollIntoView({ block: "start" });
+        card.focus({ preventScroll: true });
+      });
+      actions.append(button);
+    }
   }
 
   function trendFigure(indicator, history, now) {
@@ -358,6 +471,7 @@
   function renderCards(now) {
     for (const indicator of indicators) {
       const card = get(`card-${indicator.id}`);
+      card.tabIndex = -1;
       const openSections = new Set([...card.querySelectorAll("details[open]")].map((details) => details.dataset.section));
       const history = historyFor(indicator.id);
       const current = history.at(-1) || null;
@@ -375,11 +489,14 @@
       recorded.textContent = current
         ? `Last recorded: ${new Date(current.timestamp).toLocaleString(undefined, { timeZoneName: "short" })}. Source: ${current.source}.${current.context ? ` Context: ${current.context}.` : ""}`
         : "No measurement timestamp or input source is available.";
+      const hazardPanel = element("section", "hazard-links");
+      hazardPanel.hidden = true;
+      hazardPanel.setAttribute("aria-label", "Verified association records for the selected hazard");
       const trend = trendFigure(indicator, history, now);
       const guidance = element("div", "guidance-grid");
       for (const [section, title] of guidanceSections) guidance.append(claimSection(indicator, section, title, "Awaiting manual source verification.", openSections));
       card.replaceChildren(
-        heading, badge, measurement, baseline, deviation, recorded,
+        heading, badge, measurement, baseline, deviation, recorded, hazardPanel,
         element("p", "metadata threshold-note", "Illustrative demo thresholds, not clinical."),
         element("p", "metadata", indicator.thresholds || "Green: |deviation| <=10%; Amber: >10% to <=20%; Red: >20%."),
         trend.figure, trendTable(indicator, trend.points, openSections), guidance,
@@ -388,6 +505,8 @@
       updateCardStatus(indicator, current, now);
     }
     get("reading-summary").textContent = `SIMULATED trends \u00b7 ${status.MAX_READING_AGE_MS / (60 * 60 * 1000)}-hour recency cutoff`;
+    renderHazardAssociations();
+    updateZoneEmphasis();
   }
 
   const form = get("measurement-form");
@@ -556,6 +675,24 @@
     get("demo-announcement").textContent = "SIMULATED seven-day readings reset. Original personal baselines remain fixed.";
   });
 
+  for (const button of hazardButtons) {
+    button.addEventListener("click", () => {
+      selectedHazard = button.dataset.hazard;
+      renderHazardAssociations();
+    });
+  }
+  for (const control of zoneControls) {
+    control.addEventListener("click", () => selectZone(control.dataset.zone));
+    if (control.getAttribute("role") === "button") {
+      control.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          if (!event.repeat) selectZone(control.dataset.zone);
+        }
+      });
+    }
+  }
+
   const logo = get("project-logo");
   const showLogoPlaceholder = () => {
     logo.hidden = true;
@@ -568,6 +705,8 @@
   saveReadings();
   renderCards(Date.now());
   for (const id of ["open-entry", "test-deviation", "reset-demo"]) get(id).disabled = false;
+  for (const button of hazardButtons) button.disabled = false;
+  for (const control of zoneControls) if (control instanceof HTMLButtonElement) control.disabled = false;
   const refreshStatuses = () => {
     for (const indicator of indicators) updateCardStatus(indicator, historyFor(indicator.id).at(-1) || null, Date.now());
   };

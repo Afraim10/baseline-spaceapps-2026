@@ -91,7 +91,7 @@
       <section class="hazard-bar" aria-labelledby="hazard-heading">
         <div class="section-heading">
           <h2 id="hazard-heading">Hazard lens</h2>
-          <p id="hazard-note" class="metadata">Controls are inactive in this shell.</p>
+          <p id="hazard-note" class="metadata">Associations require verified hazard-link records.</p>
         </div>
         <div class="hazard-options" role="group" aria-label="Hazard lens selection"
              aria-describedby="hazard-note">
@@ -108,18 +108,61 @@
           <button class="hazard-button" type="button" data-hazard="closed-environment"
                   aria-pressed="false" disabled>Hostile Closed Environments</button>
         </div>
+        <p id="hazard-association-status" class="metadata" role="status" aria-live="polite">No source-verified associations loaded for this hazard.</p>
+        <aside id="radiation-design-note" class="design-note" aria-labelledby="radiation-note-heading" hidden>
+          <h3 id="radiation-note-heading">BASELINE design note</h3>
+          <p>The six indicators do not measure radiation exposure.</p>
+        </aside>
       </section>
 
       <div class="dashboard-grid">
         <aside class="body-panel" aria-labelledby="body-heading">
           <h2 id="body-heading">Body explorer</h2>
-          <p class="metadata">Interface grouping, not an anatomical claim.</p>
-          <div id="body-figure-slot" class="body-figure-slot">
-            <div>
-              <p class="slot-title">Body schematic</p>
-              <p class="metadata">Interactive zones are not yet enabled.</p>
-            </div>
+          <p id="body-grouping-note" class="metadata">Interface grouping, not an anatomical claim.</p>
+          <svg id="body-schematic" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 240 520" role="group" aria-labelledby="body-title body-desc">
+            <title id="body-title">BASELINE body schematic</title>
+            <desc id="body-desc">Geometric human silhouette with three selectable interface groupings. Use the zones or the equivalent buttons to emphasize indicator cards; these groupings are not anatomical claims.</desc>
+            <g id="body-base" class="silhouette" aria-hidden="true">
+              <path d="M120 22 C98 22 83 39 83 62 C83 84 98 99 120 99 C142 99 157 84 157 62 C157 39 142 22 120 22 Z"/>
+              <path d="M104 91 L136 91 L140 128 L100 128 Z"/>
+              <path d="M68 125 C56 130 50 143 47 159 L30 222 C27 234 32 243 42 246 C51 248 58 242 61 232 L79 169 L91 137 Z"/>
+              <path d="M172 125 C184 130 190 143 193 159 L210 222 C213 234 208 243 198 246 C189 248 182 242 179 232 L161 169 L149 137 Z"/>
+              <path d="M96 108 C80 111 68 123 62 137 C56 151 59 171 62 187 L74 244 C77 261 87 270 103 273 L97 349 C96 361 87 371 78 379 L84 390 L156 390 L162 379 C153 371 144 361 143 349 L137 273 C153 270 163 261 166 244 L178 187 C181 171 184 151 178 137 C172 123 160 111 144 108 Z"/>
+              <path d="M92 365 C89 389 86 416 84 440 L81 478 C80 487 85 492 93 492 H110 C116 492 119 487 118 479 L124 414 L120 371 Z"/>
+              <path d="M148 365 C151 389 154 416 156 440 L159 478 C160 487 155 492 147 492 H130 C124 492 121 487 122 479 L116 414 L120 371 Z"/>
+              <path d="M85 486 H110 C116 486 120 491 120 499 V503 H72 V498 C73 491 78 486 85 486 Z"/>
+              <path d="M130 486 H155 C162 486 167 491 168 498 V503 H120 V499 C120 491 124 486 130 486 Z"/>
+            </g>
+            <g id="zone-neuro" class="zone" data-zone="neuro" role="button" tabindex="0" aria-pressed="false"
+               aria-label="Head / Neuro interface grouping: Sleep Hours and Mood." aria-describedby="body-grouping-note">
+              <title>Interface grouping, not an anatomical claim.</title>
+              <path d="M120 22 C98 22 83 39 83 62 C83 84 98 99 120 99 C142 99 157 84 157 62 C157 39 142 22 120 22 Z"/>
+            </g>
+            <g id="zone-cardio" class="zone" data-zone="cardio" role="button" tabindex="0" aria-pressed="false"
+               aria-label="Thorax / Cardio interface grouping: Blood Pressure and Heart Rate." aria-describedby="body-grouping-note">
+              <title>Interface grouping, not an anatomical claim.</title>
+              <path d="M96 124 C83 126 75 137 75 153 L83 226 C85 241 98 249 120 250 C142 249 155 241 157 226 L165 153 C165 137 157 126 144 124 C136 121 128 120 120 120 C112 120 104 121 96 124 Z"/>
+            </g>
+            <g id="zone-systemic" class="zone" data-zone="systemic" role="button" tabindex="0" aria-pressed="false"
+               aria-label="Systemic / Metabolic interface grouping: Blood Glucose and Body Temperature." aria-describedby="body-grouping-note">
+              <title>Interface grouping, not an anatomical claim.</title>
+              <path d="M84 250 C94 257 106 260 120 260 C134 260 146 257 156 250 L150 337 C148 353 158 368 169 378 C152 384 136 389 120 389 C104 389 88 384 71 378 C82 368 92 353 90 337 Z"/>
+            </g>
+          </svg>
+          <div class="zone-controls" role="group" aria-label="Body interface groupings" aria-describedby="body-grouping-note">
+            <button type="button" data-zone="neuro" aria-pressed="false" disabled>
+              <span>Head / Neuro</span><span class="metadata">Sleep Hours, Mood</span>
+            </button>
+            <button type="button" data-zone="cardio" aria-pressed="false" disabled>
+              <span>Thorax / Cardio</span><span class="metadata">Blood Pressure, Heart Rate</span>
+            </button>
+            <button type="button" data-zone="systemic" aria-pressed="false" disabled>
+              <span>Systemic / Metabolic</span><span class="metadata">Blood Glucose, Body Temperature</span>
+            </button>
           </div>
+          <p id="zone-selection-status" class="metadata" role="status">Select a grouping; select it again to clear its emphasis.</p>
+          <div id="zone-indicator-actions" class="zone-indicator-actions" role="group" aria-label="View indicators in the selected grouping" hidden></div>
         </aside>
 
         <section class="indicators" aria-labelledby="indicators-heading">
@@ -164,7 +207,7 @@
             <article id="card-core-temperature" class="indicator-card" data-indicator="core-temperature"
                      aria-labelledby="heading-core-temperature">
               <header class="card-heading">
-                <h3 id="heading-core-temperature">Core Temperature</h3>
+                <h3 id="heading-core-temperature">Body Temperature</h3>
                 <span class="status-badge status-neutral">NO RECENT READING</span>
               </header>
               <p class="measurement"><span aria-hidden="true">--</span> <span class="measurement-unit">&deg;C</span></p>
@@ -213,13 +256,16 @@
         <noscript>Enable JavaScript to calculate counts from the local data files.</noscript>
         <section id="dev-lint-panel" class="dev-panel" aria-labelledby="dev-lint-heading" hidden>
           <h3 id="dev-lint-heading">Development lint</h3>
-          <p class="metadata">Checks source IDs, locators, verification dates, card sections, and hazard/tier metadata. No sources are contacted.</p>
+          <p class="metadata">Checks source IDs, locators, verification dates, card sections, hazard/tier/basis metadata, and interpretation notes. No sources are contacted.</p>
           <p id="dev-lint-status" role="status">Checking verified claim metadata...</p>
           <ul id="dev-lint-issues" hidden></ul>
+          <h3 class="sources-list-heading">Draft claims (development only)</h3>
+          <p id="dev-drafts-status" class="metadata">No draft claims loaded.</p>
+          <ul id="dev-drafts" class="claim-list" hidden></ul>
         </section>
       </section>
 
-      <p id="shell-note" class="metadata">Hazard lens interactions and body zones are reserved for commit 3.</p>
+      <p id="shell-note" class="metadata">Body groupings organize the interface. Hazard badges require verified association records and do not change baseline deviation statuses.</p>
     </main>
 
     <footer class="page-wrap site-footer">Deviation is not diagnosis. No medical assessment or live measurements are provided. <a href="tests.html">Offline status tests</a></footer>
