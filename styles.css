@@ -1,4 +1,3 @@
-/* AI-assisted (GPT-6 Astra via Kilo), reviewed by author. */
 :root {
   /* Brand */
   --brand-primary: #155F7A;
@@ -382,7 +381,7 @@ button:disabled {
 .indicator-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
   min-height: 280px;
 }
 
@@ -428,6 +427,10 @@ button:disabled {
 }
 
 .measurement {
+  color: var(--text-primary);
+}
+
+.indicator-card[data-state="neutral"] .measurement {
   color: var(--text-secondary);
 }
 
@@ -508,6 +511,316 @@ button:disabled {
   font-size: 12px;
 }
 
+.demo-toolbar,
+.demo-actions,
+.form-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.demo-toolbar {
+  justify-content: space-between;
+  margin-block: var(--space-4) var(--space-2);
+}
+
+.demo-announcement:not(:empty) {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--brand-primary);
+  background: var(--brand-tint);
+}
+
+.entry-panel {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--brand-primary);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  scroll-margin-top: 64px;
+}
+
+.entry-panel > p {
+  margin-top: var(--space-2);
+}
+
+#measurement-form {
+  margin-top: var(--space-4);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-block: var(--space-4);
+}
+
+.form-field {
+  min-width: 0;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.form-field .metadata,
+.field-error {
+  margin-top: var(--space-2);
+}
+
+.form-field [aria-invalid="true"] {
+  border-color: var(--status-alert-border);
+}
+
+.field-error {
+  color: var(--status-alert-text);
+  font-size: 13px;
+}
+
+.validation-summary {
+  margin-block: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--status-alert-border);
+  border-radius: var(--radius-md);
+  background: var(--status-alert-bg);
+  color: var(--status-alert-text);
+}
+
+.validation-summary ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.form-actions {
+  margin-top: var(--space-4);
+}
+
+.card-status {
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+
+.status-icon {
+  flex-shrink: 0;
+}
+
+.baseline-summary {
+  font-family: var(--font-data);
+  font-size: 13px;
+}
+
+.recorded {
+  font-family: var(--font-data);
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.threshold-note {
+  font-weight: 600;
+}
+
+.trend-figure {
+  margin: 0;
+}
+
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 110px;
+}
+
+.chart-gridline {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+}
+
+.tolerance-band {
+  fill: var(--chart-baseline-band);
+}
+
+.baseline-line {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.trend-line {
+  fill: none;
+  stroke: var(--chart-line);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.trend-line-secondary {
+  stroke: var(--brand-pressed);
+  stroke-dasharray: 4 3;
+}
+
+.trend-point {
+  fill: var(--chart-line);
+}
+
+.trend-point-secondary {
+  fill: var(--brand-pressed);
+}
+
+.chart-times {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-block: var(--space-1);
+  font-family: var(--font-data);
+  font-weight: 400;
+}
+
+.guidance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--space-3);
+}
+
+.guidance-grid details[open] {
+  grid-column: 1 / -1;
+}
+
+.guidance-section,
+.trend-data {
+  min-width: 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+summary {
+  min-height: 44px;
+  padding-block: var(--space-3);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+details[open] > summary {
+  color: var(--brand-primary);
+}
+
+.guidance-section > p,
+.trend-data > p {
+  padding-bottom: var(--space-3);
+}
+
+.claim-list {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+.claim-list li + li {
+  margin-top: var(--space-3);
+}
+
+.claim-citation {
+  margin-top: var(--space-2);
+}
+
+.sources-list-heading {
+  margin-top: var(--space-5);
+}
+
+.sources-list {
+  padding-left: var(--space-5);
+  overflow-wrap: anywhere;
+}
+
+.sources-list li + li {
+  margin-top: var(--space-3);
+}
+
+.sources-list .metadata {
+  display: block;
+  margin-top: var(--space-1);
+}
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+}
+
+caption {
+  padding-block: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: left;
+}
+
+th,
+td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 12px;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+th {
+  font-weight: 500;
+}
+
+td {
+  font-family: var(--font-data);
+}
+
+.tests-page {
+  padding-block: var(--space-8);
+}
+
+.tests-page > p {
+  margin-top: var(--space-4);
+}
+
+#test-summary {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  font-family: var(--font-data);
+}
+
+.test-pass {
+  background: var(--status-good-bg);
+  color: var(--status-good-text);
+  font-weight: 600;
+}
+
+.test-fail {
+  background: var(--status-alert-bg);
+  color: var(--status-alert-text);
+  font-weight: 600;
+}
+
 @media (max-width: 960px) {
   .dashboard-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -519,7 +832,9 @@ button:disabled {
 }
 
 @media (max-width: 700px) {
-  .indicator-grid {
+  .indicator-grid,
+  .field-grid,
+  .guidance-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 

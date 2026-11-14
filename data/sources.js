@@ -1,4 +1,3 @@
-/* AI-assisted (GPT-6 Astra via Kilo), reviewed by author. */
 "use strict";
 
 window.BASELINE = window.BASELINE || {};

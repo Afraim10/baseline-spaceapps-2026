@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BASELINE | Offline status tests</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <script src="status.js" defer></script>
+  </head>
+  <body>
+    <div class="compliance-bar" role="note">
+      <div class="page-wrap compliance-inner">
+        <span>PROTOTYPE &mdash; NOT MEDICAL ADVICE</span>
+        <span class="simulated-badge">SIMULATED TESTS</span>
+      </div>
+    </div>
+    <main class="page-wrap tests-page">
+      <h1>Offline status tests</h1>
+      <p>SIMULATED fixtures exercise configured demo boundaries, not medical reference values.</p>
+      <p><a href="index.html">Return to BASELINE</a></p>
+      <p id="test-summary" role="status">Running tests...</p>
+      <noscript>Enable JavaScript to run these dependency-free tests.</noscript>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Status test results">
+        <table id="test-results">
+          <caption>Pure status and entry-validation tests</caption>
+          <thead><tr><th scope="col">Indicator</th><th scope="col">Case</th><th scope="col">Expected</th><th scope="col">Actual</th><th scope="col">Result</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        "use strict";
+        const status = window.BASELINE.status;
+        const now = Date.UTC(2026, 10, 14, 12);
+        const baselines = {
+          "blood-pressure": { value: { systolic: 120, diastolic: 80 }, unit: "mmHg" },
+          "heart-rate": { value: 100, context: "resting", unit: "bpm" },
+          "blood-glucose": { value: 100, context: "fasting", unit: "mg/dL" },
+          "core-temperature": { value: 36.7, unit: "\u00b0C" },
+          "sleep-hours": { value: 10, unit: "hours" },
+          mood: { value: 4, unit: "points" }
+        };
+        const cases = [];
+        cases.push({ id: "all", name: "Demo entry configuration is immutable", expected: "true", run: () => String(
+          Object.isFrozen(status.limits) && Object.values(status.limits).every((config) => Object.isFrozen(config)
+            && Object.values(config).filter(Array.isArray).every(Object.isFrozen))
+        ) });
+        const labels = { good: "Green", warn: "Amber", alert: "Red" };
+        const readingFor = (id, value) => ({
+          value, timestamp: now, context: baselines[id].context,
+          unit: baselines[id].unit, source: "SIMULATED test fixture"
+        });
+        function comparison(id, name, reading, expected, baseline = baselines[id]) {
+          cases.push({ id, name, expected, run: () => status.evaluate(id, reading, baseline, now).label });
+        }
+        const relativeCases = [
+          [-20.001, "alert"], [-20, "warn"], [-19.999, "warn"],
+          [-10.001, "warn"], [-10, "good"], [-9.999, "good"], [0, "good"],
+          [9.999, "good"], [10, "good"], [10.001, "warn"],
+          [19.999, "warn"], [20, "warn"], [20.001, "alert"]
+        ];
+        for (const id of ["heart-rate", "blood-glucose", "sleep-hours"]) {
+          for (const [percent, state] of relativeCases) {
+            comparison(id, `${percent}% deviation`, readingFor(id, baselines[id].value * (1 + percent / 100)), labels[state]);
+          }
+          const baseline = { ...baselines[id], value: id === "sleep-hours" ? 7.5 : 73 };
+          comparison(id, "10% boundary with a fractional reading", readingFor(id, baseline.value * 1.1), "Green", baseline);
+          comparison(id, "Zero baseline cannot be compared", readingFor(id, baselines[id].value), "BASELINE NOT ESTABLISHED", { ...baselines[id], value: 0 });
+        }
+        const absoluteCases = [
+          [-16, "alert"], [-15, "warn"], [-14, "warn"], [-9, "warn"], [-8, "good"], [-7, "good"],
+          [0, "good"], [7, "good"], [8, "good"], [9, "warn"], [14, "warn"], [15, "warn"], [16, "alert"]
+        ];
+        for (const field of ["systolic", "diastolic"]) {
+          for (const [delta, state] of absoluteCases) {
+            const value = { ...baselines["blood-pressure"].value };
+            value[field] += delta;
+            comparison("blood-pressure", `${field}: ${delta} mmHg deviation`, readingFor("blood-pressure", value), labels[state]);
+          }
+        }
+        for (const [systolic, diastolic, expected] of [[124, 96, "Red"], [136, 82, "Red"], [129, 96, "Red"], [129, 82, "Amber"]]) {
+          comparison("blood-pressure", `Worst channel governs (${systolic}/${diastolic})`, readingFor("blood-pressure", { systolic, diastolic }), expected);
+        }
+        for (const [delta, state] of [
+          [-1.001, "alert"], [-1, "alert"], [-0.999, "warn"], [-0.401, "warn"], [-0.4, "good"], [-0.399, "good"],
+          [0, "good"], [0.399, "good"], [0.4, "good"], [0.401, "warn"], [0.999, "warn"], [1, "alert"], [1.001, "alert"]
+        ]) {
+          comparison("core-temperature", `${delta} C deviation`, readingFor("core-temperature", baselines["core-temperature"].value + delta), labels[state]);
+        }
+        for (const [value, expected] of [[5, "Green"], [4, "Green"], [3, "Amber"], [2, "Red"], [1, "Red"]]) {
+          comparison("mood", `Anchored mood delta ${value - 4}`, readingFor("mood", value), expected);
+        }
+        comparison("mood", "Fractional mood is not an anchored reading", readingFor("mood", 3.5), "NO RECENT READING");
+        comparison("sleep-hours", "Zero sleep is a reading, not missing data", readingFor("sleep-hours", 0), "Red");
+
+        for (const id of Object.keys(baselines)) {
+          const current = readingFor(id, baselines[id].value);
+          comparison(id, "Missing reading", null, "NO RECENT READING");
+          comparison(id, "Missing value", { ...current, value: null }, "NO RECENT READING");
+          comparison(id, "Non-finite value", { ...current, value: id === "blood-pressure" ? { systolic: NaN, diastolic: 80 } : NaN }, "NO RECENT READING");
+          comparison(id, "Missing personal baseline", current, "BASELINE NOT ESTABLISHED", null);
+          comparison(id, "Missing baseline value", current, "BASELINE NOT ESTABLISHED", { ...baselines[id], value: null });
+          comparison(id, "Exactly 48 hours old is still recent", { ...current, timestamp: now - status.MAX_READING_AGE_MS }, "Green");
+          comparison(id, "One millisecond beyond 48 hours is stale", { ...current, timestamp: now - status.MAX_READING_AGE_MS - 1 }, "NO RECENT READING");
+          comparison(id, "Invalid timestamp", { ...current, timestamp: NaN }, "NO RECENT READING");
+          comparison(id, "Future reading", { ...current, timestamp: now + 1 }, "NO RECENT READING");
+          comparison(id, "Different units are not silently compared", { ...current, unit: "test-only-different-unit" }, "NOT COMPARABLE (unit differs)");
+          const saved = JSON.stringify({ reading: current, baseline: baselines[id] });
+          cases.push({ id, name: "Evaluation and tolerance bands leave inputs unchanged", expected: "true", run: () => {
+            status.evaluate(id, current, baselines[id], now);
+            status.toleranceBands(id, baselines[id]);
+            return String(saved === JSON.stringify({ reading: current, baseline: baselines[id] }));
+          } });
+        }
+        for (const id of ["heart-rate", "blood-glucose"]) {
+          const current = readingFor(id, baselines[id].value);
+          comparison(id, "Other context is logged but not comparable", { ...current, context: "other" }, "NOT COMPARABLE (context differs)");
+          comparison(id, "Missing reading context", { ...current, context: undefined }, "NOT COMPARABLE (context differs)");
+          comparison(id, "Baseline context is not established", current, "BASELINE NOT ESTABLISHED", { ...baselines[id], context: undefined });
+        }
+
+        function validation(id, name, reading, expected) {
+          cases.push({ id, name, expected, run: () => status.validateReading(id, reading, now).length === 0 ? "Accepted" : "Rejected" });
+        }
+        for (const id of Object.keys(baselines)) {
+          const fields = id === "blood-pressure" ? ["systolic", "diastolic"] : ["value"];
+          for (const field of fields) {
+            const [min, max] = status.limits[id][field];
+            for (const [value, expected] of [[min - 1, "Rejected"], [min, "Accepted"], [max, "Accepted"], [max + 1, "Rejected"]]) {
+              const reading = readingFor(id, id === "blood-pressure" ? { systolic: field === "diastolic" ? 200 : value, diastolic: field === "systolic" ? 40 : value } : value);
+              validation(id, `Entry guard: ${field} = ${value}`, reading, expected);
+            }
+          }
+          validation(id, "Future entry is rejected", { ...readingFor(id, baselines[id].value), timestamp: now + 1 }, "Rejected");
+          validation(id, "Timestamp exactly now is accepted", readingFor(id, baselines[id].value), "Accepted");
+          validation(id, "Blank timestamp is rejected", { ...readingFor(id, baselines[id].value), timestamp: NaN }, "Rejected");
+          validation(id, "Blank numeric entry is rejected", { ...readingFor(id, baselines[id].value), value: id === "blood-pressure" ? { systolic: NaN, diastolic: 80 } : NaN }, "Rejected");
+          validation(id, "Non-simulated source is rejected", { ...readingFor(id, baselines[id].value), source: "" }, "Rejected");
+          cases.push({ id, name: "Missing baseline has no tolerance band", expected: "0", run: () => String(status.toleranceBands(id, null).length) });
+        }
+        validation("blood-pressure", "Diastolic equal to systolic is rejected", readingFor("blood-pressure", { systolic: 100, diastolic: 100 }), "Rejected");
+        validation("blood-pressure", "Diastolic above systolic is rejected", readingFor("blood-pressure", { systolic: 100, diastolic: 110 }), "Rejected");
+        validation("mood", "Fractional anchored mood is rejected", readingFor("mood", 2.5), "Rejected");
+        for (const id of ["heart-rate", "blood-glucose"]) {
+          validation(id, "Other context is accepted for logging", { ...readingFor(id, baselines[id].value), context: "other" }, "Accepted");
+          validation(id, "Unknown context is rejected", { ...readingFor(id, baselines[id].value), context: "unknown" }, "Rejected");
+        }
+        cases.push({ id: "blood-pressure", name: "Both BP channels have an 8 mmHg tolerance band", expected: "true", run: () => {
+          const bands = status.toleranceBands("blood-pressure", baselines["blood-pressure"]);
+          return String(bands.length === 2 && bands.every((band) => band.baseline - band.min === 8 && band.max - band.baseline === 8));
+        } });
+        for (const id of ["heart-rate", "blood-glucose", "sleep-hours"]) {
+          cases.push({ id, name: "Relative tolerance band is +/-10%", expected: "true", run: () => {
+            const band = status.toleranceBands(id, baselines[id])[0];
+            return String(Math.abs(band.min - baselines[id].value * 0.9) < 1e-10 && Math.abs(band.max - baselines[id].value * 1.1) < 1e-10);
+          } });
+        }
+        cases.push({ id: "core-temperature", name: "Temperature tolerance band is +/-0.4 C", expected: "true", run: () => {
+          const band = status.toleranceBands("core-temperature", baselines["core-temperature"])[0];
+          return String(Math.abs(band.baseline - band.min - 0.4) < 1e-10 && Math.abs(band.max - band.baseline - 0.4) < 1e-10);
+        } });
+        cases.push({ id: "mood", name: "Mood tolerance band includes non-negative anchored deltas", expected: "true", run: () => {
+          const band = status.toleranceBands("mood", baselines.mood)[0];
+          return String(band.min === 4 && band.max === 5);
+        } });
+
+        let passed = 0;
+        const body = document.querySelector("#test-results tbody");
+        for (const test of cases) {
+          let actual;
+          try { actual = test.run(); } catch (error) { actual = `${error.name}: ${error.message}`; }
+          const ok = actual === test.expected;
+          if (ok) passed += 1;
+          const row = document.createElement("tr");
+          for (const value of [test.id, test.name, test.expected, actual, ok ? "PASS" : "FAIL"]) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+          }
+          row.lastElementChild.className = ok ? "test-pass" : "test-fail";
+          body.appendChild(row);
+        }
+        const failed = cases.length - passed;
+        document.getElementById("test-summary").textContent = `${passed} passed, ${failed} failed (${cases.length} tests).`;
+        document.body.dataset.testFailures = String(failed);
+        window.BASELINE.testResults = { passed, failed, total: cases.length };
+      });
+    </script>
+  </body>
+</html>
