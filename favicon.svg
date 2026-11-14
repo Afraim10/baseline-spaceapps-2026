@@ -1,0 +1,36 @@
+<!-- AI-assisted (GPT-6 Astra via Kilo), reviewed by author. -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 32 32"
+     role="img"
+     aria-labelledby="favicon-title">
+
+  <title id="favicon-title">BASELINE</title>
+
+  <style>
+    .favicon-bg {
+      fill: #142536;
+    }
+
+    .favicon-ring {
+      fill: none;
+      stroke: #8CC6D5;
+      stroke-width: 1.5;
+    }
+
+    .favicon-pulse {
+      fill: none;
+      stroke: #FFFFFF;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+
+  <circle class="favicon-bg" cx="16" cy="16" r="14.5"/>
+
+  <circle class="favicon-ring" cx="16" cy="16" r="13"/>
+
+  <path class="favicon-pulse"
+        d="M5.5 17 H10.5 L13 12.5 L16 21 L19 14.5 L21.5 17 H26.5"/>
+
+</svg>

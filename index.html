@@ -1,33 +1,179 @@
+<!-- AI-assisted (GPT-6 Astra via Kilo), reviewed by author. -->
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BASELINE</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
+    <script src="data/sources.js" defer></script>
     <script src="data/claims.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
-    <main class="site-shell">
-      <header>
-        <p class="eyebrow">Astronaut health-monitoring prototype</p>
-        <h1>BASELINE</h1>
-        <p class="intro">An offline scaffold for personal-baseline health monitoring.</p>
-      </header>
+    <a class="skip-link" href="#main-content">Skip to health monitor</a>
 
-      <p class="prototype-banner" role="note">Prototype, simulated data, not medical advice</p>
+    <div class="compliance-bar" role="note">
+      <div class="page-wrap compliance-inner">
+        <span>PROTOTYPE &mdash; NOT MEDICAL ADVICE</span>
+        <span class="simulated-badge">SIMULATED DATA</span>
+      </div>
+    </div>
 
-      <section class="evidence" aria-labelledby="evidence-heading">
-        <div class="section-heading">
-          <h2 id="evidence-heading">Evidence</h2>
-          <span class="status-label">SIMULATED</span>
+    <header class="page-wrap site-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <img id="project-logo" src="assets/baseline-logo.png"
+               alt="BASELINE project emblem (AI-generated)" width="56" height="56">
+          <span id="logo-placeholder" class="logo-placeholder" hidden>Emblem<br>pending</span>
         </div>
-        <p id="claims-status">No verified claims available.</p>
-        <ul id="claims-list" hidden></ul>
+        <div class="brand-copy">
+          <h1>BASELINE</h1>
+          <p class="metadata">Personal baseline first &middot; AI-generated emblem</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="#sources-verification">Sources &amp; verification</a>
+        <button id="open-entry" class="button-primary" type="button"
+                aria-describedby="shell-note" disabled>Log a health measurement</button>
+      </div>
+    </header>
+
+    <main id="main-content" class="page-wrap" tabindex="-1">
+      <p class="privacy-notice">Do not enter real personal health data.</p>
+
+      <section class="hazard-bar" aria-labelledby="hazard-heading">
+        <div class="section-heading">
+          <h2 id="hazard-heading">Hazard lens</h2>
+          <p id="hazard-note" class="metadata">Controls are inactive in this shell.</p>
+        </div>
+        <div class="hazard-options" role="group" aria-label="Hazard lens selection"
+             aria-describedby="hazard-note">
+          <button class="hazard-button" type="button" data-hazard="all"
+                  aria-pressed="true" disabled>All hazards</button>
+          <button class="hazard-button" type="button" data-hazard="radiation"
+                  aria-pressed="false" disabled>Radiation</button>
+          <button class="hazard-button" type="button" data-hazard="isolation"
+                  aria-pressed="false" disabled>Isolation &amp; Confinement</button>
+          <button class="hazard-button" type="button" data-hazard="distance"
+                  aria-pressed="false" disabled>Distance from Earth</button>
+          <button class="hazard-button" type="button" data-hazard="gravity"
+                  aria-pressed="false" disabled>Gravity Fields</button>
+          <button class="hazard-button" type="button" data-hazard="closed-environment"
+                  aria-pressed="false" disabled>Hostile Closed Environments</button>
+        </div>
       </section>
 
-      <footer>No medical assessment or live measurements are provided.</footer>
+      <div class="dashboard-grid">
+        <aside class="body-panel" aria-labelledby="body-heading">
+          <h2 id="body-heading">Body explorer</h2>
+          <p class="metadata">Interface grouping, not an anatomical claim.</p>
+          <div id="body-figure-slot" class="body-figure-slot">
+            <div>
+              <p class="slot-title">Body schematic</p>
+              <p class="metadata">Interactive zones are not yet enabled.</p>
+            </div>
+          </div>
+        </aside>
+
+        <section class="indicators" aria-labelledby="indicators-heading">
+          <div class="section-heading">
+            <h2 id="indicators-heading">Health indicators</h2>
+            <p class="metadata">No readings loaded</p>
+          </div>
+          <div id="indicator-grid" class="indicator-grid">
+            <article id="card-blood-pressure" class="indicator-card" data-indicator="blood-pressure"
+                     aria-labelledby="heading-blood-pressure">
+              <header class="card-heading">
+                <h3 id="heading-blood-pressure">Blood Pressure</h3>
+                <span class="status-badge status-neutral">NO RECENT READING</span>
+              </header>
+              <p class="measurement"><span aria-hidden="true">--</span> <span class="measurement-unit">mmHg</span></p>
+              <p><span class="field-label">Personal baseline</span><br><span class="metadata">BASELINE NOT ESTABLISHED</span></p>
+              <p class="metadata slot-description">Illustrative demo thresholds, not clinical.</p>
+            </article>
+
+            <article id="card-heart-rate" class="indicator-card" data-indicator="heart-rate"
+                     aria-labelledby="heading-heart-rate">
+              <header class="card-heading">
+                <h3 id="heading-heart-rate">Heart Rate</h3>
+                <span class="status-badge status-neutral">NO RECENT READING</span>
+              </header>
+              <p class="measurement"><span aria-hidden="true">--</span> <span class="measurement-unit">bpm</span></p>
+              <p><span class="field-label">Personal baseline</span><br><span class="metadata">BASELINE NOT ESTABLISHED</span></p>
+              <p class="metadata slot-description">Illustrative demo thresholds, not clinical.</p>
+            </article>
+
+            <article id="card-blood-glucose" class="indicator-card" data-indicator="blood-glucose"
+                     aria-labelledby="heading-blood-glucose">
+              <header class="card-heading">
+                <h3 id="heading-blood-glucose">Blood Glucose</h3>
+                <span class="status-badge status-neutral">NO RECENT READING</span>
+              </header>
+              <p class="measurement"><span aria-hidden="true">--</span> <span class="measurement-unit">mg/dL</span></p>
+              <p><span class="field-label">Personal baseline</span><br><span class="metadata">BASELINE NOT ESTABLISHED</span></p>
+              <p class="metadata slot-description">Illustrative demo thresholds, not clinical.</p>
+            </article>
+
+            <article id="card-core-temperature" class="indicator-card" data-indicator="core-temperature"
+                     aria-labelledby="heading-core-temperature">
+              <header class="card-heading">
+                <h3 id="heading-core-temperature">Core Temperature</h3>
+                <span class="status-badge status-neutral">NO RECENT READING</span>
+              </header>
+              <p class="measurement"><span aria-hidden="true">--</span> <span class="measurement-unit">&deg;C</span></p>
+              <p><span class="field-label">Personal baseline</span><br><span class="metadata">BASELINE NOT ESTABLISHED</span></p>
+              <p class="metadata slot-description">Illustrative demo thresholds, not clinical.</p>
+            </article>
+
+            <article id="card-sleep-hours" class="indicator-card" data-indicator="sleep-hours"
+                     aria-labelledby="heading-sleep-hours">
+              <header class="card-heading">
+                <h3 id="heading-sleep-hours">Sleep Hours</h3>
+                <span class="status-badge status-neutral">NO RECENT READING</span>
+              </header>
+              <p class="measurement"><span aria-hidden="true">--</span> <span class="measurement-unit">hours</span></p>
+              <p><span class="field-label">Personal baseline</span><br><span class="metadata">BASELINE NOT ESTABLISHED</span></p>
+              <p class="metadata slot-description">Illustrative demo thresholds, not clinical.</p>
+            </article>
+
+            <article id="card-mood" class="indicator-card" data-indicator="mood"
+                     aria-labelledby="heading-mood">
+              <header class="card-heading">
+                <h3 id="heading-mood">Mood</h3>
+                <span class="status-badge status-neutral">NO RECENT READING</span>
+              </header>
+              <p class="measurement"><span aria-hidden="true">--</span> <span class="measurement-unit">self-report</span></p>
+              <p><span class="field-label">Personal baseline</span><br><span class="metadata">BASELINE NOT ESTABLISHED</span></p>
+              <p class="metadata slot-description">Illustrative demo thresholds, not clinical.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <section id="sources-verification" class="sources-panel" aria-labelledby="sources-heading">
+        <h2 id="sources-heading">Sources &amp; verification</h2>
+        <p>No scientific claims have been authored. This panel reports the local data inventory.</p>
+        <dl class="source-counts">
+          <div><dt>Total claims</dt><dd id="claims-total">--</dd></div>
+          <div><dt>Verified</dt><dd id="claims-verified">--</dd></div>
+          <div><dt>Unverified</dt><dd id="claims-unverified">--</dd></div>
+          <div><dt>Registered sources</dt><dd id="sources-total">--</dd></div>
+        </dl>
+        <p id="claims-status">No verified guidance is displayed in this shell.</p>
+        <noscript>Enable JavaScript to calculate counts from the local data files.</noscript>
+        <section id="dev-lint-panel" class="dev-panel" aria-labelledby="dev-lint-heading" hidden>
+          <h3 id="dev-lint-heading">Development lint</h3>
+          <p class="metadata">Every verified claim needs a registered source ID and a non-empty locator.</p>
+          <p id="dev-lint-status" role="status">Checking verified claim metadata...</p>
+          <ul id="dev-lint-issues" hidden></ul>
+        </section>
+      </section>
+
+      <p id="shell-note" class="metadata">Interface shell only. Measurement and lens controls are not yet enabled.</p>
     </main>
+
+    <footer class="page-wrap site-footer">Deviation is not diagnosis. No medical assessment or live measurements are provided.</footer>
   </body>
 </html>
