@@ -2,13 +2,13 @@
 
 ## Overview
 
-BASELINE is a static browser health-monitoring prototype for NASA Space Apps 2026, not a game. It includes six baseline-first cards, native SVG sparklines, collapsed timestamped data tables, validated measurement entry, and a persistent SIMULATED seven-day demo. Commit 4 adds hazard-wide association records and the replacement inline body schematic. The interface uses the DESIGN.md tokens.
+BASELINE is a static browser health-monitoring prototype for NASA Space Apps 2026, not a game. It includes six baseline-first cards, native SVG sparklines, collapsed timestamped data tables, validated measurement entry, a persistent SIMULATED seven-day demo, hazard-wide association records, and an inline body schematic. The interface uses the DESIGN.md tokens.
 
 Open `index.html` directly in a browser. No server, build step, package installation, libraries, or network connection is required. Classic scripts load local data into `window.BASELINE`; no modules, fetch calls, or external font downloads are used.
 
 The always-visible compliance bar reads "PROTOTYPE &mdash; NOT MEDICAL ADVICE" and "SIMULATED DATA". The privacy notice reads "Do not enter real personal health data."
 
-The supplied `favicon.svg` is linked locally. The header expects `assets/baseline-logo.png` with alt text "BASELINE project emblem (AI-generated)" and a visible AI-generated label. That PNG is not present yet; the header shows an explicit emblem-pending placeholder if it fails to load.
+The supplied `favicon.svg` is linked locally. The header loads `assets/baseline-logo.png` with alt text "BASELINE project emblem (AI-generated)" and a visible AI-generated label. That PNG is present in the repository; the header retains an explicit emblem-pending placeholder if the image fails to load.
 
 Use **Log a health measurement** to enter synthetic test readings. Heart Rate comparisons require the fixed `resting` context; Blood Glucose uses the fixed `fasting` context. `other` readings are logged but receive `NOT COMPARABLE (context differs)`. Units are fixed for this demo, including glucose in `mg/dL`; no silent unit conversion is performed.
 
@@ -28,13 +28,34 @@ Demo history is saved under the versioned `localStorage` key `baseline.demo.v1`.
 
 `status.js` exposes pure functions through `window.BASELINE.status`. `MAX_READING_AGE_MS` is 48 hours: exactly 48 hours remains recent, anything older is neutral. Missing readings, missing baselines, and differing contexts never default to Green. Status freshness is rechecked every minute and when the window regains focus. Charts show a rolling seven-day window at render time; backdated entries do not replace a later current reading.
 
-Open `tests.html` directly to run the offline pass/fail table. It covers every configured indicator boundary in both directions, exact boundary values, worst-channel Blood Pressure, context mismatch, missing and stale data, entry guards, and tolerance bands. Tests use explicitly SIMULATED fixtures and need no test framework or server.
+## Offline Tests
+
+Open `C:\baseline\tests.html` directly in a browser, or select **Offline status tests** in the `index.html` footer. With JavaScript enabled, tests run automatically and show a passed/failed summary plus a result row for each case; reload the page to rerun them. No network connection, test framework, package installation, or server is required.
+
+The tests cover every configured indicator boundary in both directions, exact boundary values, worst-channel Blood Pressure, context mismatch, missing and stale data, entry guards, and tolerance bands. Fixtures are explicitly SIMULATED. This suite tests status and entry-validation logic, not hazard-button routing, image loading, or scientific accuracy.
 
 Append `?dev=1` to the page URL to show metadata lint and a separate development-only draft inventory. Drafts are marked "DRAFT - NOT VERIFIED" and never populate guidance, reference panels, or hazard associations. No source URLs are contacted by lint or rendering.
 
-## NASA Data
+## NASA And CSA Sources
 
-No scientific claims are authored by this implementation. Both data inventories remain empty; no NASA data are retrieved and no source URLs, DOIs, or quotations are invented. All hardcoded readings, baselines, and tolerance bands are synthetic demo configuration, not scientific reference values.
+Claims and source metadata are loaded from the populated local inventories below; no NASA or CSA data are retrieved at runtime. All hardcoded readings, baselines, and tolerance bands are synthetic demo configuration, not scientific reference values.
+
+These NASA and Canadian Space Agency pages are cited by the retained claims. Titles, source IDs, and URLs are copied from `data/sources.js`; listing them here is not a new scientific verification or a fresh check of the remote pages.
+
+| Source ID | Page |
+| --- | --- |
+| `nasa-hrp-hazards` | [Five Hazards of Human Spaceflight](https://www.nasa.gov/hrp/hazards/) |
+| `nasa-hazard-gravity-fields` | [Gravity Fields](https://www.nasa.gov/hrp/hazard-gravity-fields/) |
+| `nasa-hrp-isolation` | [Isolation and Confinement](https://www.nasa.gov/hrp/hazard-isolation-and-confinement/) |
+| `nasa-hrp-distance` | [Distance from Earth](https://www.nasa.gov/hrp/hazard-distance-from-earth/) |
+| `nasa-space-radiation-risks` | [Space Radiation](https://nasa.gov/hrp/5-hazards-of-human-spaceflight/space-radiation/) |
+| `nasa-hfbp-slee-risk` | [Risk of Performance Decrements and Adverse Health Outcomes Resulting from Sleep Loss, Circadian Desynchronization, and Work Overload](https://humanresearchroadmap.nasa.gov/Risks/risk.aspx?i=100) |
+| `csa-bio-monitor` | [Bio-Monitor: Keeping an eye on astronauts' vital signs](https://asc-csa.gc.ca/eng/sciences/bio-monitor.asp) |
+| `habitability_functions` | [Features of the system required for human occupancy.](https://www.nasa.gov/reference/7-0-habit-ability-functions-vol-2/) |
+| `ntrs-iss-lab-analysis` | [Laboratory Analysis Capability for the International Space Station and Future Space Exploration Missions](https://ntrs.nasa.gov/api/citations/20150012223/downloads/20150012223.pdf) |
+| `nasa-hazard-hostile-closed-environments` | [Hazard: Hostile/Closed Environments](https://www.nasa.gov/hrp/hazard-hostile-closed-environments/) |
+
+The inventory also registers `nasa-hfbp-risks`, [Sleep Loss, Circadian Desynchronization, and Work Overload Risk](https://www.nasa.gov/directorates/esdmd/hhp/risk-of-performance-decrements-and-adverse-health-outcomes-resulting-from-sleep-loss-circadian-desynchronization-and-work-overload/), which is not currently referenced by the retained claims. The in-app Sources & verification panel lists only sources used by display-eligible verified claims.
 
 - `data/sources.js`: `source_id`, `title`, `publisher`, `url`, `accessed`.
 - `data/claims.js`: `id`, `text`, `indicator`, `section`, `hazard`, `tier`, `basis`, `note`, `source_id`, `locator`, `verified`, `verified_on`.
@@ -45,20 +66,31 @@ Runtime claim validation also accepts `all` and `none` indicator IDs. Undefined 
 
 `basis` is `source` or `interpretation`; `note` is a string, normally empty for source-based claims. Every interpretation needs a non-empty note, including interpretation claims outside the hazard lens. Verification of underlying source material does not turn an author interpretation into a relationship stated by that source. Interpretation notes and provenance warnings remain visible beside the relevant claim.
 
-Each card's four guidance sections render only explicitly verified claims matching its indicator and section. Claims need a registered, unambiguous source ID, a source title and safe link, a locator, a verification date, and valid routing/basis/note metadata; invalid metadata blocks display and appears in dev lint. Every displayed claim includes the source title as a link and its locator. Empty sections show "Awaiting manual source verification."
+Each card's four guidance sections render only explicitly verified claims matching its indicator and section. Claims need a registered, unambiguous source ID, a source title and safe link, a locator, a verification date, and valid routing/basis/note metadata; invalid metadata blocks display and appears in dev lint. Every displayed claim includes the source title as a link and its locator. Empty sections show "No source-verified guidance loaded for this section (left empty rather than invented)."
 
 The collapsed "General adult reference &mdash; not spaceflight-validated." panel renders only verified `reference` claims. It shows "No verified reference values loaded." when empty. No general-adult reference numbers are hardcoded. The Sources & verification panel counts verification flags and lists sources used by display-eligible verified claims. Passing lint or tests does not verify scientific accuracy.
 
 ## AI Use
 
-Code and documentation were generated with AI assistance using Kilo and require author review. `body-schematic2.svg` was AI-generated; its drawing is used inline with a visible AI-generated label and interface-grouping disclaimer. Per-file attribution headers have been removed. The project emblem is designated AI-generated and labeled accordingly. AI assistance and passing tests do not verify scientific content. No NASA logos are used.
+AI assistance was used for:
+
+- **Kilo / GPT-6 Astra:** code and tests.
+- **ChatGPT:** design specification and SVGs.
+- **Gemini:** planning and draft claims.
+- **Claude:** review.
+
+AI-generated code and documentation require author review. `body-schematic2.svg` was AI-generated; its drawing is used inline with a visible AI-generated label and interface-grouping disclaimer. Per-file attribution headers have been removed. The project emblem is designated AI-generated and labeled accordingly. AI assistance and passing tests do not verify scientific content; draft claims require manual source checking before verification. No NASA logos are used.
 
 ## Limitations
 
 - Prototype only, not medical advice or a validated clinical tool.
 - "Illustrative demo thresholds, not clinical." Green, Amber, and Red express configured deviations, not diagnoses, urgency, or validated mission protocols.
 - Numeric validation uses "entry limits, not clinical thresholds" as typo guards and rejects values rather than clamping. It does not establish medical plausibility or safety.
+- Guidance is incomplete. Sections without eligible source-verified claims stay empty rather than supplying invented explanations, preventive actions, or escalation instructions.
+- Verification flags, metadata lint, and passing tests do not establish scientific accuracy, clinical validation, or applicability to a spaceflight mission.
+- Measurement-method context does not validate the demo readings: the cited CSA passage describes skin temperature, not core-temperature measurement, and the blood-analysis passages do not establish glucose measurement.
 - Body-zone emphasis and hazard badges organize the interface; neither changes personal-baseline deviation status or establishes clinical causation.
+- No live sensors, telemetry, or medical assessment are connected. Browser `localStorage` is not a secure medical record and may be unavailable or cleared.
 - Personal baselines will remain fixed: no auto-adjustment or Update Personal Baseline action. The environment selector and OSDR example are out of scope.
 - Any future synthetic readings must remain labeled `SIMULATED`; never enter real personal health data.
 - Hackathon timing, submission wording, and other event rules remain subject to verification against the official 2026 guide.

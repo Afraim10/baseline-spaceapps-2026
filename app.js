@@ -525,7 +525,7 @@
       hazardPanel.setAttribute("aria-label", "Verified association records for the selected hazard");
       const trend = trendFigure(indicator, history, now);
       const guidance = element("div", "guidance-grid");
-      for (const [section, title] of guidanceSections) guidance.append(claimSection(indicator, section, title, "Awaiting manual source verification.", openSections));
+      for (const [section, title] of guidanceSections) guidance.append(claimSection(indicator, section, title, "No source-verified guidance loaded for this section (left empty rather than invented).", openSections));
       card.replaceChildren(
         heading, badge, measurement, baseline, deviation, recorded, hazardPanel,
         element("p", "metadata threshold-note", "Illustrative demo thresholds, not clinical."),
