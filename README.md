@@ -2,7 +2,7 @@
 
 ## Overview
 
-BASELINE is a static browser health-monitoring prototype for NASA Space Apps 2026, not a game. It includes six baseline-first cards, native SVG sparklines, collapsed timestamped data tables, validated measurement entry, and a persistent SIMULATED seven-day demo. Commit 3 adds the inline body schematic and verified-claim hazard lens. The interface uses the DESIGN.md tokens.
+BASELINE is a static browser health-monitoring prototype for NASA Space Apps 2026, not a game. It includes six baseline-first cards, native SVG sparklines, collapsed timestamped data tables, validated measurement entry, and a persistent SIMULATED seven-day demo. Commit 4 adds hazard-wide association records and the replacement inline body schematic. The interface uses the DESIGN.md tokens.
 
 Open `index.html` directly in a browser. No server, build step, package installation, libraries, or network connection is required. Classic scripts load local data into `window.BASELINE`; no modules, fetch calls, or external font downloads are used.
 
@@ -14,9 +14,11 @@ Use **Log a health measurement** to enter synthetic test readings. Heart Rate co
 
 The display label is **Body Temperature**. The `core-temperature` IDs, claim-routing key, saved-reading key, and existing status math are unchanged.
 
-The geometric markup from `body-schematic.svg` is inline in `index.html`, not loaded as an image. SVG zones and equivalent external buttons support click, Enter, Space, visible keyboard focus, and synchronized `aria-pressed`. Select the active grouping again to clear it, or use its View buttons to focus a card. Head / Neuro groups Sleep Hours and Mood; Thorax / Cardio groups Blood Pressure and Heart Rate; Systemic / Metabolic groups Blood Glucose and Body Temperature. These are interface groupings, not anatomical claims or hazard associations.
+The geometric markup from `body-schematic2.svg` is inline in `index.html`, not loaded as an image. Its embedded styles are merged into `styles.css`; the metadata/C2PA block and namespace are not copied into the page. SVG zones and equivalent external buttons support click, Enter, Space, dashed-stroke keyboard focus, and synchronized `aria-pressed`. Select the active grouping again to clear it, or use its View buttons to focus a card. Head / Neuro groups Sleep Hours and Mood; Thorax / Cardio groups Blood Pressure and Heart Rate; Systemic / Metabolic groups Blood Glucose and Body Temperature. These are interface groupings, not anatomical claims or hazard associations; the additional drawing details are decorative and do not intercept pointer input.
 
 Hazard associations come only from display-eligible, explicitly verified `hazard-link` claims with an exact matching hazard ID. There is no hardcoded indicator/hazard mapping. **All hazards** displays the explicit `hazard: "all"` scope, not an aggregation or wildcard for other scopes. Unlinked cards remain visible without a hazard badge; if the selected scope has no verified links, the lens shows "No source-verified associations loaded for this hazard."
+
+Hazard-wide claims with `indicator: "all"` or `indicator: "none"` appear in a panel inside the selected hazard bar, including their tier, provenance note, and source citation. `all` also gives every indicator card a tier badge linking to that shared evidence panel; `none` never badges a card. Card-specific guidance and reference sections continue to require an exact card indicator ID.
 
 Linked cards show "RELATED TO SELECTED HAZARD" with the relationship tier, claim text, source title link, and locator. Interpretation links additionally show "Interface association &mdash; not stated by the cited source." and the author's required note. The Radiation view always displays the requested **BASELINE design note** that the six indicators do not measure radiation exposure. This hardcoded interface caution is separate from the claims inventory and never creates an association.
 
@@ -39,6 +41,8 @@ No scientific claims are authored by this implementation. Both data inventories 
 
 Every claim defaults to `verified: false` and `verified_on: null`. Only Afraim's personal source check permits verification. Sections are `why`, `how`, `prevent`, `escalate`, `hazard-link`, and `reference`. Hazard-link claims require a hazard ID (including `all`), a `primary`, `secondary`, or `operational` tier, and a basis. Other claims normally use null hazard/tier values.
 
+Runtime claim validation also accepts `all` and `none` indicator IDs. Undefined hazard/tier values are normalized to null, and an undefined note to an empty string, on in-memory copies only. `data/claims.js` and `data/sources.js` are not modified by normalization. A case-insensitive occurrence of `CHECK`, `TBD`, or `Draft:` anywhere in text, note, or locator fails lint; a marked verified claim is excluded from display. Placeholder markers in unverified drafts are reported without treating incomplete draft metadata as verified.
+
 `basis` is `source` or `interpretation`; `note` is a string, normally empty for source-based claims. Every interpretation needs a non-empty note, including interpretation claims outside the hazard lens. Verification of underlying source material does not turn an author interpretation into a relationship stated by that source. Interpretation notes and provenance warnings remain visible beside the relevant claim.
 
 Each card's four guidance sections render only explicitly verified claims matching its indicator and section. Claims need a registered, unambiguous source ID, a source title and safe link, a locator, a verification date, and valid routing/basis/note metadata; invalid metadata blocks display and appears in dev lint. Every displayed claim includes the source title as a link and its locator. Empty sections show "Awaiting manual source verification."
@@ -47,7 +51,7 @@ The collapsed "General adult reference &mdash; not spaceflight-validated." panel
 
 ## AI Use
 
-Code and documentation were generated with AI assistance using Kilo and require author review. Per-file attribution headers have been removed. The project emblem is designated AI-generated and labeled accordingly. AI assistance and passing tests do not verify scientific content. No NASA logos are used.
+Code and documentation were generated with AI assistance using Kilo and require author review. `body-schematic2.svg` was AI-generated; its drawing is used inline with a visible AI-generated label and interface-grouping disclaimer. Per-file attribution headers have been removed. The project emblem is designated AI-generated and labeled accordingly. AI assistance and passing tests do not verify scientific content. No NASA logos are used.
 
 ## Limitations
 

@@ -2,7 +2,13 @@
   "use strict";
 
   const status = window.BASELINE.status;
-  const { claims, sources } = window.BASELINE;
+  const { sources } = window.BASELINE;
+  const claims = window.BASELINE.claims.map((claim) => claim && ({
+    ...claim,
+    hazard: claim.hazard === undefined ? null : claim.hazard,
+    tier: claim.tier === undefined ? null : claim.tier,
+    note: claim.note === undefined ? "" : claim.note
+  }));
   const DAY_MS = 24 * 60 * 60 * 1000;
   const TREND_WINDOW_MS = 7 * DAY_MS;
   const STORAGE_KEY = "baseline.demo.v1";
@@ -101,9 +107,17 @@
 
   function claimIssues(claim) {
     const issues = [];
+    for (const field of ["text", "note", "locator"]) {
+      if (typeof claim[field] === "string" && /CHECK|TBD|Draft:/i.test(claim[field])) {
+        issues.push(`${field} contains a placeholder marker (CHECK, TBD, or Draft:).`);
+      }
+    }
+    if (claim.verified !== true) return issues;
     if (!nonEmpty(claim.id)) issues.push("id is missing.");
     if (!nonEmpty(claim.text)) issues.push("text is missing.");
-    if (!indicatorById.has(claim.indicator)) issues.push("indicator is not a configured card ID.");
+    if (!indicatorById.has(claim.indicator) && !["all", "none"].includes(claim.indicator)) {
+      issues.push("indicator must be a configured card ID, all, or none.");
+    }
     if (!sections.has(claim.section)) issues.push("section is not a supported claim section.");
     const source = sourceById.get(claim.source_id);
     if (!nonEmpty(claim.source_id) || !source) {
@@ -132,7 +146,7 @@
   }
 
   const verifiedClaims = claims.filter((claim) => claim && claim.verified === true);
-  const metadataIssues = new Map(verifiedClaims.map((claim) => [claim, claimIssues(claim)]));
+  const metadataIssues = new Map(claims.filter(Boolean).map((claim) => [claim, claimIssues(claim)]));
   const displayClaims = verifiedClaims.filter((claim) => metadataIssues.get(claim).length === 0);
 
   function renderSources() {
@@ -162,10 +176,10 @@
     const dev = new URLSearchParams(window.location.search).get("dev") === "1";
     get("dev-lint-panel").hidden = !dev;
     if (!dev) return;
-    const issues = verifiedClaims.flatMap((claim) => metadataIssues.get(claim).map((issue) => `Claim ${claim.id || "(missing id)"}: ${issue}`));
+    const issues = claims.filter(Boolean).flatMap((claim) => metadataIssues.get(claim).map((issue) => `Claim ${claim.id || "(missing id)"}: ${issue}`));
     get("dev-lint-status").textContent = issues.length
-      ? `${issues.length} verified-claim metadata issue(s) found. Affected claims are not displayed.`
-      : "No verified-claim metadata issues found. This is not scientific verification.";
+      ? `${issues.length} claim metadata issue(s) found. Affected verified claims are not displayed.`
+      : "No claim metadata issues found. This is not scientific verification.";
     const issueList = get("dev-lint-issues");
     issueList.replaceChildren();
     issueList.hidden = issues.length === 0;
@@ -273,11 +287,13 @@
     card.querySelector(".deviation").textContent = formatDeviation(indicator, result);
   }
 
-  function claimItem(claim) {
+  function claimItem(claim, hazardWide = false) {
     const source = sourceById.get(claim.source_id);
     const item = element("li");
     if (claim.section === "hazard-link") {
-      item.append(element("p", "related-badge", `RELATED TO SELECTED HAZARD \u00b7 ${tierLabels[claim.tier]}`));
+      item.append(element("p", hazardWide ? "tier-badge" : "related-badge", hazardWide
+        ? tierLabels[claim.tier]
+        : `RELATED TO SELECTED HAZARD \u00b7 ${tierLabels[claim.tier]}`));
     }
     item.append(element("p", "", claim.text));
     if (claim.basis === "interpretation") {
@@ -324,16 +340,31 @@
       ? `${links.length} verified association record(s) loaded for ${hazardName}.`
       : "No source-verified associations loaded for this hazard.";
     get("radiation-design-note").hidden = selectedHazard !== "radiation";
+    const wideLinks = links.filter((claim) => ["all", "none"].includes(claim.indicator));
+    const wideList = get("hazard-wide-claims");
+    wideList.replaceChildren();
+    get("hazard-wide-records").hidden = wideLinks.length === 0;
+    for (const claim of wideLinks) wideList.append(claimItem(claim, true));
     for (const indicator of indicators) {
       const card = get(`card-${indicator.id}`);
-      const matches = links.filter((claim) => claim.indicator === indicator.id);
+      const matches = links.filter((claim) => claim.indicator === indicator.id || claim.indicator === "all");
       card.classList.toggle("is-hazard-related", matches.length > 0);
       const panel = card.querySelector(".hazard-links");
       panel.replaceChildren();
       panel.hidden = matches.length === 0;
       if (matches.length) {
         const list = element("ul", "claim-list");
-        for (const claim of matches) list.append(claimItem(claim));
+        for (const claim of matches) {
+          if (claim.indicator === "all") {
+            const item = element("li");
+            const badge = element("a", "related-badge", `RELATED TO SELECTED HAZARD \u00b7 ${tierLabels[claim.tier]}`);
+            badge.href = "#hazard-wide-records";
+            item.append(badge);
+            list.append(item);
+          } else {
+            list.append(claimItem(claim));
+          }
+        }
         panel.append(list);
       }
     }

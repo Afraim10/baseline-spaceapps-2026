@@ -109,6 +109,10 @@
                   aria-pressed="false" disabled>Hostile Closed Environments</button>
         </div>
         <p id="hazard-association-status" class="metadata" role="status" aria-live="polite">No source-verified associations loaded for this hazard.</p>
+        <section id="hazard-wide-records" class="hazard-links hazard-wide-records" aria-labelledby="hazard-wide-heading" tabindex="-1" hidden>
+          <h3 id="hazard-wide-heading">Hazard-wide association records</h3>
+          <ul id="hazard-wide-claims" class="claim-list"></ul>
+        </section>
         <aside id="radiation-design-note" class="design-note" aria-labelledby="radiation-note-heading" hidden>
           <h3 id="radiation-note-heading">BASELINE design note</h3>
           <p>The six indicators do not measure radiation exposure.</p>
@@ -124,32 +128,42 @@
             <title id="body-title">BASELINE body schematic</title>
             <desc id="body-desc">Geometric human silhouette with three selectable interface groupings. Use the zones or the equivalent buttons to emphasize indicator cards; these groupings are not anatomical claims.</desc>
             <g id="body-base" class="silhouette" aria-hidden="true">
-              <path d="M120 22 C98 22 83 39 83 62 C83 84 98 99 120 99 C142 99 157 84 157 62 C157 39 142 22 120 22 Z"/>
-              <path d="M104 91 L136 91 L140 128 L100 128 Z"/>
-              <path d="M68 125 C56 130 50 143 47 159 L30 222 C27 234 32 243 42 246 C51 248 58 242 61 232 L79 169 L91 137 Z"/>
-              <path d="M172 125 C184 130 190 143 193 159 L210 222 C213 234 208 243 198 246 C189 248 182 242 179 232 L161 169 L149 137 Z"/>
-              <path d="M96 108 C80 111 68 123 62 137 C56 151 59 171 62 187 L74 244 C77 261 87 270 103 273 L97 349 C96 361 87 371 78 379 L84 390 L156 390 L162 379 C153 371 144 361 143 349 L137 273 C153 270 163 261 166 244 L178 187 C181 171 184 151 178 137 C172 123 160 111 144 108 Z"/>
-              <path d="M92 365 C89 389 86 416 84 440 L81 478 C80 487 85 492 93 492 H110 C116 492 119 487 118 479 L124 414 L120 371 Z"/>
-              <path d="M148 365 C151 389 154 416 156 440 L159 478 C160 487 155 492 147 492 H130 C124 492 121 487 122 479 L116 414 L120 371 Z"/>
-              <path d="M85 486 H110 C116 486 120 491 120 499 V503 H72 V498 C73 491 78 486 85 486 Z"/>
-              <path d="M130 486 H155 C162 486 167 491 168 498 V503 H120 V499 C120 491 124 486 130 486 Z"/>
+              <path d="M183 115 C193 115 201 123 202 136 C204 160 208 184 212 208 C214 220 217 230 217 238 C217 246 209 250 205 246 C201 242 202 234 200 226 C196 208 190 190 187 172 C185 160 183 148 183 134 C183 127 183 121 183 115 Z"/>
+              <path d="M57 115 C47 115 39 123 38 136 C36 160 32 184 28 208 C26 220 23 230 23 238 C23 246 31 250 35 246 C39 242 38 234 40 226 C44 208 50 190 53 172 C55 160 57 148 57 134 C57 127 57 121 57 115 Z"/>
+              <path d="M123 306 L162 304 C167 340 167 368 163 400 C160 424 162 446 155 472 L155 492 C165 493 172 499 173 507 L137 507 L137 472 C135 448 131 424 130 400 C128 372 124 340 123 306 Z"/>
+              <path d="M117 306 L78 304 C73 340 73 368 77 400 C80 424 78 446 85 472 L85 492 C75 493 68 499 67 507 L103 507 L103 472 C105 448 109 424 110 400 C112 372 116 340 117 306 Z"/>
+              <path d="M137 98 C146 102 160 104 172 109 C179 112 180 120 179 128 C178 148 174 170 168 190 C165 203 163 214 164 228 C165 244 172 252 173 268 C174 284 168 298 158 308 C148 312 132 318 120 318 C108 318 92 312 82 308 C72 298 66 284 67 268 C68 252 75 244 76 228 C77 214 75 203 72 190 C66 170 62 148 61 128 C60 120 61 112 68 109 C80 104 94 102 103 98 Z"/>
             </g>
             <g id="zone-neuro" class="zone" data-zone="neuro" role="button" tabindex="0" aria-pressed="false"
                aria-label="Head / Neuro interface grouping: Sleep Hours and Mood." aria-describedby="body-grouping-note">
               <title>Interface grouping, not an anatomical claim.</title>
-              <path d="M120 22 C98 22 83 39 83 62 C83 84 98 99 120 99 C142 99 157 84 157 62 C157 39 142 22 120 22 Z"/>
+              <path d="M120 16 C139 16 151 30 151 50 C151 64 146 74 139 80 C137 83 136 87 136 92 L137 98 L103 98 L104 92 C104 87 103 83 101 80 C94 74 89 64 89 50 C89 30 101 16 120 16 Z"/>
+              <path class="detail" d="M119 30 C108 28 100 35 101 44 C96 49 98 58 106 60 C109 66 116 67 119 63 Z"/>
+              <path class="detail" d="M121 30 C132 28 140 35 139 44 C144 49 142 58 134 60 C131 66 124 67 121 63 Z"/>
+              <path class="detail" d="M105 44 C109 42 112 44 113 47 M135 44 C131 42 128 44 127 47"/>
             </g>
             <g id="zone-cardio" class="zone" data-zone="cardio" role="button" tabindex="0" aria-pressed="false"
                aria-label="Thorax / Cardio interface grouping: Blood Pressure and Heart Rate." aria-describedby="body-grouping-note">
               <title>Interface grouping, not an anatomical claim.</title>
-              <path d="M96 124 C83 126 75 137 75 153 L83 226 C85 241 98 249 120 250 C142 249 155 241 157 226 L165 153 C165 137 157 126 144 124 C136 121 128 120 120 120 C112 120 104 121 96 124 Z"/>
+              <path d="M137 98 C146 102 160 104 172 109 C179 112 180 120 179 128 C178 148 174 170 168 190 Q 120 174 72 190 C66 170 62 148 61 128 C60 120 61 112 68 109 C80 104 94 102 103 98 Z"/>
+              <path class="detail" d="M104 120 C94 118 82 126 80 146 C79 160 82 172 90 174 C98 175 104 170 104 160 Z"/>
+              <path class="detail" d="M141 122 C148 118 158 126 160 146 C161 160 158 172 150 174 C144 175 143 170 143 160 Z"/>
+              <path class="detail" d="M124 168 C112 160 106 152 108 144 C110 137 119 136 124 143 C129 136 138 137 140 144 C142 152 136 160 124 168 Z"/>
+              <path class="detail" d="M112 152 H118 L121 146 L125 159 L128 150 H136"/>
             </g>
             <g id="zone-systemic" class="zone" data-zone="systemic" role="button" tabindex="0" aria-pressed="false"
                aria-label="Systemic / Metabolic interface grouping: Blood Glucose and Body Temperature." aria-describedby="body-grouping-note">
               <title>Interface grouping, not an anatomical claim.</title>
-              <path d="M84 250 C94 257 106 260 120 260 C134 260 146 257 156 250 L150 337 C148 353 158 368 169 378 C152 384 136 389 120 389 C104 389 88 384 71 378 C82 368 92 353 90 337 Z"/>
+              <path d="M168 190 C165 203 163 214 164 228 C165 244 172 252 173 268 C174 284 168 298 158 308 C148 312 132 318 120 318 C108 318 92 312 82 308 C72 298 66 284 67 268 C68 252 75 244 76 228 C77 214 75 203 72 190 Q 120 174 168 190 Z"/>
+              <path class="detail" d="M122 184 V258 M122 258 C118 272 110 284 106 298 M122 258 C126 272 134 284 138 298"/>
+              <path class="detail" d="M100 212 C96 219 94 223 94 227 C94 231 97 234 100 234 C103 234 106 231 106 227 C106 223 104 219 100 212 Z"/>
+              <rect class="detail" x="138" y="210" width="5" height="18" rx="2.5"/>
+              <circle class="detail" cx="140.5" cy="233" r="5"/>
+              <circle class="detail-fill" cx="140.5" cy="233" r="2.5"/>
+              <path class="detail" d="M84 272 C90 294 104 302 120 302 C136 302 150 294 156 272"/>
             </g>
           </svg>
+          <p class="metadata">AI-generated schematic</p>
           <div class="zone-controls" role="group" aria-label="Body interface groupings" aria-describedby="body-grouping-note">
             <button type="button" data-zone="neuro" aria-pressed="false" disabled>
               <span>Head / Neuro</span><span class="metadata">Sleep Hours, Mood</span>
@@ -256,7 +270,7 @@
         <noscript>Enable JavaScript to calculate counts from the local data files.</noscript>
         <section id="dev-lint-panel" class="dev-panel" aria-labelledby="dev-lint-heading" hidden>
           <h3 id="dev-lint-heading">Development lint</h3>
-          <p class="metadata">Checks source IDs, locators, verification dates, card sections, hazard/tier/basis metadata, and interpretation notes. No sources are contacted.</p>
+          <p class="metadata">Checks source IDs, locators, verification dates, claim routing, provenance, and placeholder markers in text, note, or locator. No sources are contacted.</p>
           <p id="dev-lint-status" role="status">Checking verified claim metadata...</p>
           <ul id="dev-lint-issues" hidden></ul>
           <h3 class="sources-list-heading">Draft claims (development only)</h3>
