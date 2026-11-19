@@ -129,11 +129,6 @@
   letter-spacing: -0.03em;
 }
 
-.brand-logo {
-  border-color: var(--border-strong);
-  background: #0C172B;
-}
-
 .brand-copy .metadata {
   font-size: 12px;
 }
@@ -847,8 +842,6 @@ html:not(.motion-ready) .signal-dot {
 @media (max-width: 1100px) {
   .site-header { gap: 16px; }
   .brand-copy .metadata { display: block; }
-  .brand-copy .metadata span:first-child { display: none; }
-  .brand-copy .metadata span + span { border: 0; padding: 0; }
   .site-navigation { gap: 0; }
   .header-actions { gap: 8px; }
   .header-actions .button-primary { max-width: 220px; }

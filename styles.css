@@ -284,11 +284,6 @@ button:disabled {
   flex: 0 0 56px;
   width: 56px;
   height: 56px;
-  padding: var(--space-1);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-surface);
 }
 
 .brand-copy {
@@ -300,6 +295,7 @@ button:disabled {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 50%;
 }
 
 .logo-placeholder {

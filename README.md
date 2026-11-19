@@ -22,7 +22,7 @@ Open `index.html` directly in a browser. No server, build step, package installa
 
 The always-visible compliance bar reads "PROTOTYPE &mdash; NOT MEDICAL ADVICE" and "SIMULATED DATA". The privacy notice reads "Do not enter real personal health data."
 
-The supplied `favicon.svg` is linked locally. The header loads `assets/baseline-logo.png` with alt text "BASELINE project emblem (AI-generated)" and a visible AI-generated label. That PNG is present in the repository; the header retains an explicit emblem-pending placeholder if the image fails to load.
+The supplied `favicon.svg` is linked locally. The header displays the author-edited `assets/baseline-logo.png` as a circular emblem beside BASELINE, without a surrounding box or AI-generated label. Its alt text is "BASELINE project emblem". The header retains an emblem-pending placeholder if the image fails to load.
 
 Use **Log a health measurement** to enter synthetic test readings. Heart Rate comparisons require the fixed `resting` context; Blood Glucose uses the fixed `fasting` context. `other` readings are logged but receive `NOT COMPARABLE (context differs)`. Units are fixed for this demo, including glucose in `mg/dL`; no silent unit conversion is performed.
 
@@ -97,7 +97,7 @@ The Clinical Mission Control UI implementation and one-off browser verification 
 
 The experimental Orbital Observatory scene, replay UI, animations, and browser checks were AI-assisted using Kilo. All celestial graphics are original concept artwork, not scientific visualizations or imported NASA assets.
 
-AI-generated code and documentation require author review. `body-schematic2.svg` was AI-generated; its drawing is used inline with a visible AI-generated label and interface-grouping disclaimer. Per-file attribution headers have been removed. The project emblem is designated AI-generated and labeled accordingly. AI assistance and passing tests do not verify scientific content; draft claims require manual source checking before verification. No NASA logos are used.
+AI-generated code and documentation require author review. `body-schematic2.svg` was AI-generated; its drawing is used inline with a visible AI-generated label and interface-grouping disclaimer. Per-file attribution headers have been removed. The project author edited the emblem and logo, which use neutral labeling in the header. AI assistance and passing tests do not verify scientific content; draft claims require manual source checking before verification. No NASA logos are used.
 
 ## Limitations
 
