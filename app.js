@@ -155,7 +155,7 @@
     get("claims-unverified").textContent = String(claims.length - verifiedClaims.length);
     get("sources-total").textContent = String(sources.length);
     get("claims-status").textContent = displayClaims.length
-      ? `${displayClaims.length} verified claim(s) have complete display metadata. Drafts never populate guidance, references, or hazard associations.`
+      ? `Verified claims with complete source details: ${displayClaims.length}. Drafts never populate guidance, references, or hazard associations.`
       : "No verified claims available for display.";
     const usedIds = new Set(displayClaims.map((claim) => claim.source_id));
     const list = get("sources-used");
@@ -178,7 +178,7 @@
     if (!dev) return;
     const issues = claims.filter(Boolean).flatMap((claim) => metadataIssues.get(claim).map((issue) => `Claim ${claim.id || "(missing id)"}: ${issue}`));
     get("dev-lint-status").textContent = issues.length
-      ? `${issues.length} claim metadata issue(s) found. Affected verified claims are not displayed.`
+      ? `Claim metadata issues: ${issues.length}. Affected verified claims are not displayed.`
       : "No claim metadata issues found. This is not scientific verification.";
     const issueList = get("dev-lint-issues");
     issueList.replaceChildren();
@@ -189,7 +189,7 @@
     draftList.replaceChildren();
     draftList.hidden = drafts.length === 0;
     get("dev-drafts-status").textContent = drafts.length
-      ? `${drafts.length} draft claim(s). Development preview only; not source-verified.`
+      ? `Draft claims: ${drafts.length}. Development preview only; not source-verified.`
       : "No draft claims loaded.";
     for (const claim of drafts) {
       const item = element("li");
@@ -301,7 +301,7 @@
     if (claim.section === "hazard-link") {
       item.append(element("p", hazardWide ? "tier-badge" : "related-badge", hazardWide
         ? tierLabels[claim.tier]
-        : `RELATED TO SELECTED HAZARD \u00b7 ${tierLabels[claim.tier]}`));
+        : `Related to selected hazard: ${tierLabels[claim.tier]}`));
     }
     item.append(element("p", "", claim.text));
     if (claim.basis === "interpretation") {
@@ -309,8 +309,8 @@
       note.setAttribute("role", "note");
       note.append(
         element("p", "interpretation-label", claim.section === "hazard-link"
-          ? "Interface association \u2014 not stated by the cited source."
-          : "Author interpretation \u2014 not stated by the cited source."),
+          ? "Interface association: not stated by the cited source."
+          : "Author interpretation: not stated by the cited source."),
         element("p", "", claim.note)
       );
       item.append(note);
@@ -319,7 +319,7 @@
     const link = element("a", "", source.title);
     link.href = sourceHref(source);
     link.rel = "noopener noreferrer";
-    citation.append(link, document.createTextNode(` \u00b7 ${claim.locator}`));
+    citation.append(link, document.createTextNode(`; locator: ${claim.locator}`));
     item.append(citation);
     return item;
   }
@@ -345,13 +345,13 @@
     for (const button of hazardButtons) button.setAttribute("aria-pressed", String(button.dataset.hazard === selectedHazard));
     const hazardName = hazardButtons.find((button) => button.dataset.hazard === selectedHazard).textContent;
     get("hazard-association-status").textContent = links.length
-      ? `${links.length} verified association record(s) loaded for ${hazardName}.`
+      ? `Verified association records for ${hazardName}: ${links.length}.`
       : "No source-verified associations loaded for this hazard.";
     get("radiation-design-note").hidden = selectedHazard !== "radiation";
     const wideLinks = links.filter((claim) => ["all", "none"].includes(claim.indicator));
     get("hazard-association-status").classList.toggle("visually-hidden", links.length > 0 && wideLinks.length === links.length);
     get("hazard-wide-context").textContent = wideLinks.length
-      ? `${wideLinks.length} verified record(s) \u00b7 ${[...new Set(wideLinks.map((claim) => tierLabels[claim.tier]))].join(" \u00b7 ")}`
+      ? `Verified records: ${wideLinks.length}. ${[...new Set(wideLinks.map((claim) => tierLabels[claim.tier]))].join(", ")}.`
       : "";
     const wideList = get("hazard-wide-claims");
     wideList.replaceChildren();
@@ -369,7 +369,7 @@
         for (const claim of matches) {
           if (claim.indicator === "all") {
             const item = element("li");
-            const badge = element("a", "related-badge", `RELATED TO SELECTED HAZARD \u00b7 ${tierLabels[claim.tier]}`);
+            const badge = element("a", "related-badge", `Related to selected hazard: ${tierLabels[claim.tier]}`);
             badge.href = "#hazard-wide-records";
             item.append(badge);
             list.append(item);
@@ -472,7 +472,7 @@
     });
     const times = element("div", recent ? "sample-label" : "chart-times metadata");
     times.append(
-      element("span", "", recent ? "RECENT SIMULATED SAMPLES" : new Date(cutoff).toLocaleDateString()),
+      element("span", "", recent ? "Recent SIMULATED samples" : new Date(cutoff).toLocaleDateString()),
       element("span", "", recent ? `${points.length} samples` : new Date(now).toLocaleDateString())
     );
     if (recent) figure.append(times);
@@ -691,8 +691,7 @@
       const history = historyFor(indicator.id);
       const current = history.at(-1) || null;
       const heading = element("header", "card-heading");
-      const name = element("h3");
-      name.append(element("span", "channel-index", `CHANNEL ${String(indicators.indexOf(indicator) + 1).padStart(2, "0")}`), document.createTextNode(indicator.label));
+      const name = element("h3", "", indicator.label);
       name.id = `heading-${indicator.id}`;
       heading.append(name, element("span", "simulated-badge", "SIMULATED"));
       const badge = element("div", "card-status");
@@ -714,7 +713,7 @@
       archive.open = openSections.has("history-chart");
       archive.append(element("summary", "", "Seven-day timeline (actual timestamps)"), trend.figure);
       const guidance = element("div", "guidance-grid");
-      for (const [section, title] of guidanceSections) guidance.append(claimSection(indicator, section, title, "No source-verified guidance loaded for this section (left empty rather than invented).", openSections));
+      for (const [section, title] of guidanceSections) guidance.append(claimSection(indicator, section, title, "No source-verified guidance is available for this section.", openSections));
       const evidence = element("details", "card-evidence");
       evidence.dataset.section = "guidance";
       evidence.open = openSections.has("guidance");
@@ -729,7 +728,7 @@
       const details = element("div", "card-details");
       details.append(
         archive, trendTable(indicator, trend.points, openSections), thresholds, evidence,
-        claimSection(indicator, "reference", "General adult reference \u2014 not spaceflight-validated.", "No verified reference values loaded.", openSections)
+        claimSection(indicator, "reference", "General adult reference (not spaceflight-validated).", "No verified reference values loaded.", openSections)
       );
       card.replaceChildren(
         heading, readingBlock, recorded, hazardPanel,
@@ -741,7 +740,7 @@
         card.querySelector(`details[data-section="${focusedSection}"] > ${focusTarget}`)?.focus({ preventScroll: true });
       }
     }
-    get("reading-summary").textContent = `SIMULATED \u00b7 ${status.MAX_READING_AGE_MS / (60 * 60 * 1000)}h recency`;
+    get("reading-summary").textContent = `SIMULATED readings (${status.MAX_READING_AGE_MS / (60 * 60 * 1000)}-hour recency limit)`;
     renderHazardAssociations();
     updateZoneEmphasis();
     updateTelemetry(now);
@@ -791,7 +790,7 @@
       control.setAttribute("aria-describedby", `entry-${name}-hint entry-${name}-error entry-limits-note`);
       const [min, max] = status.limits[indicator.id][name];
       if (indicator.id === "mood") {
-        const empty = element("option", "", "Choose an anchored mood");
+        const empty = element("option", "", "Choose a mood");
         empty.value = "";
         control.append(empty);
         moodLabels.forEach((text, index) => {

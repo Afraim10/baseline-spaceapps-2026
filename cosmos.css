@@ -7,7 +7,7 @@
   --bg-surface: #111C32;
   --bg-surface-muted: #1A2A43;
   --bg-banner: #080D1B;
-  --bg-briefing: #F3EAD3;
+  --bg-briefing: var(--bg-surface);
   --border-strong: #7087A6;
   --border-soft: #334560;
   --text-primary: #EDF3FF;
@@ -152,6 +152,9 @@
   color: var(--text-secondary);
   font-size: 14px;
   text-decoration: none;
+  transition:
+    color var(--duration-control) var(--ease-standard),
+    background-color var(--duration-control) var(--ease-standard);
 }
 
 .site-navigation a:hover,
@@ -169,7 +172,7 @@
 }
 
 .button-quiet {
-  border-color: var(--border-soft);
+  border-color: var(--border-strong);
   background: transparent;
   color: var(--text-secondary);
   font-size: 13px;
@@ -204,7 +207,6 @@ a.button-primary {
   z-index: 2;
 }
 
-.hero-copy > .eyebrow,
 .packet-heading > span:first-child {
   display: flex;
   align-items: center;
@@ -232,14 +234,6 @@ body[data-stream="running"] .signal-dot {
   font-weight: 700;
   line-height: 1.02;
   letter-spacing: -0.055em;
-}
-
-.mission-title > span {
-  display: inline-block;
-  color: var(--brand-primary);
-  background: linear-gradient(110deg, #E0D5FF 5%, #8DE5F0 70%, #D5F5EC);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .hero-lead {
@@ -642,10 +636,6 @@ body[data-stream="running"] .signal-dot {
   letter-spacing: -0.04em;
 }
 
-.console-heading h2 span {
-  color: var(--brand-primary);
-}
-
 .console-heading > p {
   max-width: 44ch;
 }
@@ -655,7 +645,8 @@ body[data-stream="running"] .signal-dot {
 }
 
 .body-panel,
-.indicator-card {
+.indicator-card,
+.sources-panel {
   background: linear-gradient(145deg, #152238, #10182C 75%);
   border-color: #536B8C;
 }
@@ -694,16 +685,6 @@ body[data-stream="running"] .signal-dot {
 .card-heading h3 {
   font-size: 18px;
   letter-spacing: -0.02em;
-}
-
-.channel-index {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--channel-color, #8DE5F0);
-  font-family: var(--font-data);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.1em;
 }
 
 .reading-block {
@@ -769,7 +750,7 @@ body[data-stream="running"] .signal-dot {
 }
 
 .reading-provenance {
-  border-color: #334560;
+  border-color: var(--border-soft);
 }
 
 .card-details details[open] > .trend-figure {
@@ -781,22 +762,7 @@ body[data-stream="running"] .signal-dot {
 }
 
 .sources-panel {
-  --brand-primary: #155F7A;
-  --brand-hover: #104D64;
-  --brand-tint: #E8F2F6;
-  --bg-surface: #FFFFFF;
-  --bg-surface-muted: #E8EEF2;
-  --bg-canvas: #F3F6F8;
-  --border-strong: #7C91A2;
-  --border-soft: #D5DEE6;
-  --text-primary: #142536;
-  --text-secondary: #526577;
-  --focus-ring: #155F7A;
   margin-top: 64px;
-  color: var(--text-primary);
-  border-color: #C5BDAA;
-  border-radius: 20px 8px 20px 8px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
 .sources-panel h2 {
@@ -806,11 +772,11 @@ body[data-stream="running"] .signal-dot {
 }
 
 .sources-panel a {
-  color: #155F7A;
+  color: var(--brand-primary);
 }
 
 .sources-panel a:hover {
-  color: #104D64;
+  color: var(--brand-hover);
 }
 
 .sources-panel .source-counts dd {
@@ -919,7 +885,6 @@ html:not(.motion-ready) .signal-dot {
   .site-navigation { order: 0; }
   .mission-hero { padding-block: 40px 24px; }
   .mission-title { font-size: clamp(43px, 10.5vw, 62px); }
-  .hero-copy > .eyebrow { font-size: 12px; letter-spacing: 0.05em; }
   .hero-lead { font-size: 16px; line-height: 1.65; }
   .hero-actions { gap: 10px; margin-top: 24px; }
   .hero-actions > * { flex: 1 1 auto; min-height: 50px; padding-inline: 16px; font-size: 13px; }
@@ -967,7 +932,6 @@ html:not(.motion-ready) .signal-dot {
 @media (forced-colors: active) {
   .space-background,
   .orbit-art { display: none; }
-  .mission-title > span { -webkit-text-fill-color: CanvasText; background: none; }
   .orbit-readout,
   .orbit-beacon,
   .channel-chip,
