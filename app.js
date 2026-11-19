@@ -235,17 +235,25 @@
   }
 
   let readings = loadReadings(Date.now());
+  const PREVIEW_SOURCE = "SIMULATED accelerated fixture replay";
+  const REPLAY_INTERVAL_MS = 5000;
+  const PREVIEW_LIMIT = indicators.length * 24;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let previewReadings = [];
+  let previewFrame = 0;
+  let streamRunning = false;
+  let streamTimer = null;
   function saveReadings() {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: DATA_VERSION, readings }));
-      get("storage-status").textContent = `${storageWarning}SIMULATED demo data is stored in this browser under ${STORAGE_KEY}.`;
+      get("storage-status").textContent = `${storageWarning}SIMULATED demo is saved in this browser.`;
     } catch {
       get("storage-status").textContent = "Browser storage is unavailable. SIMULATED demo data stays in memory and will be lost on reload.";
     }
   }
 
   function historyFor(id) {
-    return readings.filter((reading) => reading.indicator === id).sort((a, b) => a.timestamp - b.timestamp);
+    return readings.concat(previewReadings).filter((reading) => reading.indicator === id).sort((a, b) => a.timestamp - b.timestamp);
   }
 
   function formatValue(indicator, value) {
@@ -341,6 +349,10 @@
       : "No source-verified associations loaded for this hazard.";
     get("radiation-design-note").hidden = selectedHazard !== "radiation";
     const wideLinks = links.filter((claim) => ["all", "none"].includes(claim.indicator));
+    get("hazard-association-status").classList.toggle("visually-hidden", links.length > 0 && wideLinks.length === links.length);
+    get("hazard-wide-context").textContent = wideLinks.length
+      ? `${wideLinks.length} verified record(s) \u00b7 ${[...new Set(wideLinks.map((claim) => tierLabels[claim.tier]))].join(" \u00b7 ")}`
+      : "";
     const wideList = get("hazard-wide-claims");
     wideList.replaceChildren();
     get("hazard-wide-records").hidden = wideLinks.length === 0;
@@ -406,9 +418,11 @@
     }
   }
 
-  function trendFigure(indicator, history, now) {
+  function trendFigure(indicator, history, now, recent = false) {
     const cutoff = now - TREND_WINDOW_MS;
-    const points = history.filter((reading) => reading.timestamp >= cutoff && reading.timestamp <= now);
+    const eligible = history.filter((reading) => reading.timestamp >= cutoff && reading.timestamp <= now);
+    const points = recent ? eligible.slice(-16) : eligible;
+    const position = new Map(points.map((reading, index) => [reading, index]));
     const bands = status.toleranceBands(indicator.id, indicator.baseline);
     const keys = indicator.id === "blood-pressure" ? ["systolic", "diastolic"] : ["value"];
     const valueFor = (reading, key) => key === "value" ? reading.value : reading.value[key];
@@ -421,16 +435,20 @@
     const padding = (max - min || 1) * 0.15;
     const bottom = min - padding;
     const top = max + padding;
-    const x = (timestamp) => 12 + (timestamp - cutoff) / TREND_WINDOW_MS * 296;
+    const x = recent
+      ? (reading) => 12 + position.get(reading) / Math.max(1, points.length - 1) * 296
+      : (reading) => 12 + (reading.timestamp - cutoff) / TREND_WINDOW_MS * 296;
     const y = (value) => 98 - (value - bottom) / (top - bottom) * 86;
-    const figure = element("figure", "trend-figure");
-    const titleId = `trend-title-${indicator.id}`;
-    const descId = `trend-desc-${indicator.id}`;
+    const figure = element("figure", recent ? "trend-figure sample-figure" : "trend-figure history-figure");
+    const titleId = `trend-title-${indicator.id}${recent ? "-recent" : ""}`;
+    const descId = `trend-desc-${indicator.id}${recent ? "-recent" : ""}`;
     const svg = svgElement("svg", { viewBox: "0 0 320 110", role: "img", "aria-labelledby": `${titleId} ${descId}`, class: "sparkline" });
     const title = svgElement("title", { id: titleId });
-    title.textContent = `${indicator.label}: seven-day SIMULATED trend`;
+    title.textContent = `${indicator.label}: ${recent ? "recent samples" : "seven-day trend"}, SIMULATED`;
     const desc = svgElement("desc", { id: descId });
-    desc.textContent = "Straight lines use actual timestamps and only baseline-comparable contexts. Shading is the fixed personal baseline's Green demo tolerance, not clinical. Other contexts remain in the collapsed data table.";
+    desc.textContent = recent
+      ? "Recent SIMULATED readings use equally spaced sample positions, not a time axis. Only baseline-comparable contexts are drawn. Shading is configured demo tolerance, not clinical."
+      : "Straight lines use actual timestamps and only baseline-comparable contexts. Shading is the fixed personal baseline's Green demo tolerance, not clinical. Other contexts remain in the collapsed data table.";
     svg.append(title, desc);
     for (const level of [12, 55, 98]) svg.append(svgElement("line", { x1: 12, x2: 308, y1: level, y2: level, class: "chart-gridline" }));
     for (const band of bands) {
@@ -442,8 +460,8 @@
       const draw = () => {
         if (!segment.length) return;
         const className = index ? "trend-line trend-line-secondary" : "trend-line";
-        svg.append(svgElement("polyline", { points: segment.map((reading) => `${x(reading.timestamp)},${y(valueFor(reading, key))}`).join(" "), class: className }));
-        for (const reading of segment) svg.append(svgElement("circle", { cx: x(reading.timestamp), cy: y(valueFor(reading, key)), r: 2.5, class: index ? "trend-point trend-point-secondary" : "trend-point" }));
+        svg.append(svgElement("polyline", { points: segment.map((reading) => `${x(reading)},${y(valueFor(reading, key))}`).join(" "), class: className }));
+        for (const reading of segment) svg.append(svgElement("circle", { cx: x(reading), cy: y(valueFor(reading, key)), r: 2.5, class: index ? "trend-point trend-point-secondary" : "trend-point" }));
         segment = [];
       };
       for (const reading of points) {
@@ -452,11 +470,19 @@
       }
       draw();
     });
-    const times = element("div", "chart-times metadata");
-    times.append(element("span", "", new Date(cutoff).toLocaleDateString()), element("span", "", new Date(now).toLocaleDateString()));
-    figure.append(svg, times, element("figcaption", "metadata", indicator.id === "blood-pressure"
-      ? "SIMULATED. Solid: systolic; dashed: diastolic. Shading: demo tolerance."
-      : "SIMULATED. Shading: configured demo tolerance, not clinical."));
+    const times = element("div", recent ? "sample-label" : "chart-times metadata");
+    times.append(
+      element("span", "", recent ? "RECENT SIMULATED SAMPLES" : new Date(cutoff).toLocaleDateString()),
+      element("span", "", recent ? `${points.length} samples` : new Date(now).toLocaleDateString())
+    );
+    if (recent) figure.append(times);
+    figure.append(svg);
+    if (!recent) figure.append(times);
+    figure.append(element("figcaption", "metadata", recent
+      ? `${indicator.id === "blood-pressure" ? "Solid: systolic; dashed: diastolic. " : ""}Sample sequence, not a time axis. Shading: demo tolerance, not clinical.`
+      : indicator.id === "blood-pressure"
+        ? "SIMULATED. Solid: systolic; dashed: diastolic. Shading: demo tolerance."
+        : "SIMULATED. Shading: configured demo tolerance, not clinical."));
     if (!plotted.length) figure.append(element("p", "metadata", "No comparable readings in this seven-day window."));
     return { figure, points };
   }
@@ -499,45 +525,226 @@
     return details;
   }
 
+  function readingProvenance(current) {
+    const recorded = element("div", "reading-provenance");
+    if (current) {
+      const timestamp = element("p", "metadata recorded");
+      const time = element("time", "", new Date(current.timestamp).toLocaleString(undefined, { timeZoneName: "short" }));
+      time.dateTime = new Date(current.timestamp).toISOString();
+      timestamp.append(element("span", "field-label", "Last recorded"), time);
+      recorded.append(timestamp, element("p", "metadata", `Source: ${current.source}.${current.context ? ` Context: ${current.context}.` : ""}`));
+    } else {
+      recorded.append(element("p", "metadata", "No measurement timestamp or input source is available."));
+    }
+    return recorded;
+  }
+
+  function updateTelemetry(now) {
+    for (const indicator of indicators) {
+      const current = historyFor(indicator.id).at(-1) || null;
+      const result = status.evaluate(indicator.id, current, indicator.baseline, now);
+      get(`channel-value-${indicator.id}`).textContent = formatValue(indicator, current?.value);
+      get(`channel-${indicator.id}`).dataset.state = result.state;
+      get(`channel-state-${indicator.id}`).textContent = result.label;
+    }
+    const count = String(previewFrame).padStart(3, "0");
+    get("hero-frame-count").textContent = count;
+    get("orbit-frame").textContent = `FRAME ${count}`;
+    get("stream-frame-count").textContent = `FRAME ${count} / ${previewReadings.length} PREVIEW SAMPLES`;
+  }
+
+  function updateReadings(now) {
+    for (const indicator of indicators) {
+      const card = get(`card-${indicator.id}`);
+      const history = historyFor(indicator.id);
+      const current = history.at(-1) || null;
+      card.querySelector(".measurement-value").textContent = formatValue(indicator, current?.value);
+      card.querySelector(".reading-provenance").replaceChildren(...readingProvenance(current).childNodes);
+      card.querySelector(".sample-figure").replaceWith(trendFigure(indicator, history, now, true).figure);
+      const timeline = trendFigure(indicator, history, now);
+      card.querySelector(".history-figure").replaceWith(timeline.figure);
+      const freshTable = trendTable(indicator, timeline.points, new Set());
+      const details = card.querySelector(".trend-data");
+      const oldBody = details.querySelector("tbody");
+      const newBody = freshTable.querySelector("tbody");
+      if (oldBody && newBody) oldBody.replaceChildren(...newBody.childNodes);
+      else if (newBody) {
+        details.querySelector("p")?.remove();
+        details.append(freshTable.querySelector(".table-scroll"));
+      }
+      updateCardStatus(indicator, current, now);
+    }
+    updateTelemetry(now);
+  }
+
+  function replayFrame() {
+    const now = Date.now();
+    const batch = indicators.map((indicator) => {
+      const value = indicator.demo[previewFrame % indicator.demo.length];
+      const reading = {
+        indicator: indicator.id,
+        value: indicator.id === "blood-pressure" ? { systolic: value[0], diastolic: value[1] } : value,
+        unit: indicator.unit, context: indicator.baseline.context || null,
+        timestamp: now, source: PREVIEW_SOURCE
+      };
+      return status.validateReading(indicator.id, reading, now).length ? null : reading;
+    }).filter(Boolean);
+    if (!batch.length) return;
+    previewFrame += 1;
+    previewReadings = previewReadings.concat(batch).slice(-PREVIEW_LIMIT);
+    updateReadings(now);
+    const log = get("packet-log");
+    log.querySelector(".packet-empty")?.remove();
+    for (const reading of batch) {
+      const indicator = indicatorById.get(reading.indicator);
+      const item = element("li");
+      item.dataset.indicator = indicator.id;
+      const time = element("time", "", new Date(now).toLocaleTimeString());
+      time.dateTime = new Date(now).toISOString();
+      item.append(time, element("span", "", indicator.label), element("span", "packet-value", `${formatValue(indicator, reading.value)} ${indicator.unit}`));
+      log.prepend(item);
+    }
+    while (log.children.length > indicators.length * 2) log.lastElementChild.remove();
+    window.dispatchEvent(new CustomEvent("baseline:packet", { detail: { ids: batch.map((reading) => reading.indicator) } }));
+  }
+
+  function scheduleReplay(delay = REPLAY_INTERVAL_MS) {
+    window.clearTimeout(streamTimer);
+    streamTimer = null;
+    if (!streamRunning || document.hidden) return;
+    streamTimer = window.setTimeout(() => {
+      streamTimer = null;
+      replayFrame();
+      scheduleReplay();
+    }, delay);
+  }
+
+  function setStreamRunning(running, message = "") {
+    const entering = !get("entry-panel").hidden;
+    streamRunning = running && !entering;
+    document.body.dataset.stream = streamRunning && !document.hidden ? "running" : "paused";
+    for (const button of document.querySelectorAll("[data-stream-toggle]")) {
+      button.disabled = entering;
+      button.setAttribute("aria-pressed", String(streamRunning));
+      button.textContent = streamRunning ? "Pause SIMULATED stream" : "Start SIMULATED stream";
+    }
+    get("step-stream").disabled = entering;
+    get("stream-status").textContent = message || (streamRunning
+      ? document.hidden ? "SIMULATED replay waits while this tab is hidden." : "SIMULATED preview running. A frame arrives every five seconds; samples are not saved."
+      : "SIMULATED preview paused. Step a frame or start replay to receive new samples.");
+    scheduleReplay();
+  }
+
+  function initializeTelemetry() {
+    const manifest = get("channel-manifest");
+    const orbit = get("orbit-channels");
+    for (const indicator of indicators) {
+      const chip = element("div", "channel-chip");
+      chip.id = `channel-${indicator.id}`;
+      chip.dataset.indicator = indicator.id;
+      const label = element("dt");
+      label.append(element("span", "channel-label", indicator.label), element("span", "", "SIMULATED"));
+      const value = element("dd");
+      const number = element("span", "channel-value", "--");
+      number.id = `channel-value-${indicator.id}`;
+      value.append(number, element("small", "", indicator.unit));
+      const state = element("p", "metadata channel-state", "NO RECENT READING");
+      state.id = `channel-state-${indicator.id}`;
+      chip.append(label, value, state);
+      manifest.append(chip);
+      const beacon = element("button", "orbit-beacon", indicator.label);
+      beacon.type = "button";
+      beacon.dataset.indicator = indicator.id;
+      beacon.setAttribute("aria-label", `View ${indicator.label} SIMULATED channel`);
+      beacon.addEventListener("click", () => {
+        const card = get(`card-${indicator.id}`);
+        card.scrollIntoView({ block: "start" });
+        card.focus({ preventScroll: true });
+      });
+      orbit.append(beacon);
+    }
+    get("hero-channel-count").textContent = String(indicators.length);
+    for (const button of document.querySelectorAll("[data-stream-toggle]")) {
+      button.disabled = false;
+      button.addEventListener("click", () => setStreamRunning(!streamRunning));
+    }
+    get("step-stream").disabled = false;
+    get("step-stream").addEventListener("click", () => {
+      setStreamRunning(false, "SIMULATED single-frame preview. Replay is paused for inspection.");
+      replayFrame();
+    });
+    document.addEventListener("visibilitychange", () => setStreamRunning(streamRunning));
+    reducedMotion.addEventListener("change", () => {
+      if (reducedMotion.matches) setStreamRunning(false, "SIMULATED preview paused for reduced motion. Manual frame stepping remains available.");
+    });
+  }
+
   function renderCards(now) {
     for (const indicator of indicators) {
       const card = get(`card-${indicator.id}`);
       card.tabIndex = -1;
+      card.setAttribute("data-reveal", "");
+      const focused = document.activeElement;
+      const focusedSection = card.contains(focused) ? focused.closest("details[data-section]")?.dataset.section : null;
+      const focusTarget = focused.tagName === "SUMMARY" ? "summary" : focused.classList.contains("table-scroll") ? ".table-scroll" : null;
       const openSections = new Set([...card.querySelectorAll("details[open]")].map((details) => details.dataset.section));
       const history = historyFor(indicator.id);
       const current = history.at(-1) || null;
       const heading = element("header", "card-heading");
-      const name = element("h3", "", indicator.label);
+      const name = element("h3");
+      name.append(element("span", "channel-index", `CHANNEL ${String(indicators.indexOf(indicator) + 1).padStart(2, "0")}`), document.createTextNode(indicator.label));
       name.id = `heading-${indicator.id}`;
       heading.append(name, element("span", "simulated-badge", "SIMULATED"));
       const badge = element("div", "card-status");
-      const measurement = element("p", "measurement", formatValue(indicator, current?.value));
+      const measurement = element("p", "measurement");
+      measurement.append(element("span", "measurement-value", formatValue(indicator, current?.value)));
       measurement.append(element("span", "measurement-unit", ` ${indicator.unit}`));
       const context = indicator.baseline.context ? ` (${indicator.baseline.context})` : "";
       const baseline = element("p", "baseline-summary", `Personal baseline: ${formatValue(indicator, indicator.baseline.value)} ${indicator.unit}${context}`);
       const deviation = element("p", "metadata deviation");
-      const recorded = element("p", "metadata recorded");
-      recorded.textContent = current
-        ? `Last recorded: ${new Date(current.timestamp).toLocaleString(undefined, { timeZoneName: "short" })}. Source: ${current.source}.${current.context ? ` Context: ${current.context}.` : ""}`
-        : "No measurement timestamp or input source is available.";
+      const readingBlock = element("div", "reading-block");
+      readingBlock.append(badge, measurement, baseline, deviation);
+      const recorded = readingProvenance(current);
       const hazardPanel = element("section", "hazard-links");
       hazardPanel.hidden = true;
       hazardPanel.setAttribute("aria-label", "Verified association records for the selected hazard");
       const trend = trendFigure(indicator, history, now);
+      const archive = element("details", "history-chart");
+      archive.dataset.section = "history-chart";
+      archive.open = openSections.has("history-chart");
+      archive.append(element("summary", "", "Seven-day timeline (actual timestamps)"), trend.figure);
       const guidance = element("div", "guidance-grid");
       for (const [section, title] of guidanceSections) guidance.append(claimSection(indicator, section, title, "No source-verified guidance loaded for this section (left empty rather than invented).", openSections));
-      card.replaceChildren(
-        heading, badge, measurement, baseline, deviation, recorded, hazardPanel,
-        element("p", "metadata threshold-note", "Illustrative demo thresholds, not clinical."),
-        element("p", "metadata", indicator.thresholds || "Green: |deviation| <=10%; Amber: >10% to <=20%; Red: >20%."),
-        trend.figure, trendTable(indicator, trend.points, openSections), guidance,
+      const evidence = element("details", "card-evidence");
+      evidence.dataset.section = "guidance";
+      evidence.open = openSections.has("guidance");
+      evidence.append(element("summary", "", "Evidence & guidance"), guidance);
+      const thresholds = element("details", "threshold-details");
+      thresholds.dataset.section = "thresholds";
+      thresholds.open = openSections.has("thresholds");
+      thresholds.append(
+        element("summary", "", "Demo threshold configuration"),
+        element("p", "metadata", indicator.thresholds || "Green: |deviation| <=10%; Amber: >10% to <=20%; Red: >20%.")
+      );
+      const details = element("div", "card-details");
+      details.append(
+        archive, trendTable(indicator, trend.points, openSections), thresholds, evidence,
         claimSection(indicator, "reference", "General adult reference \u2014 not spaceflight-validated.", "No verified reference values loaded.", openSections)
       );
+      card.replaceChildren(
+        heading, readingBlock, recorded, hazardPanel,
+        element("p", "metadata threshold-note", "Illustrative demo thresholds, not clinical."),
+        trendFigure(indicator, history, now, true).figure, details
+      );
       updateCardStatus(indicator, current, now);
+      if (focusedSection && focusTarget) {
+        card.querySelector(`details[data-section="${focusedSection}"] > ${focusTarget}`)?.focus({ preventScroll: true });
+      }
     }
-    get("reading-summary").textContent = `SIMULATED trends \u00b7 ${status.MAX_READING_AGE_MS / (60 * 60 * 1000)}-hour recency cutoff`;
+    get("reading-summary").textContent = `SIMULATED \u00b7 ${status.MAX_READING_AGE_MS / (60 * 60 * 1000)}h recency`;
     renderHazardAssociations();
     updateZoneEmphasis();
+    updateTelemetry(now);
   }
 
   const form = get("measurement-form");
@@ -639,6 +846,7 @@
 
   function closeEntry() {
     get("entry-panel").hidden = true;
+    setStreamRunning(false);
     get("open-entry").setAttribute("aria-expanded", "false");
     get("open-entry").focus();
   }
@@ -656,6 +864,7 @@
     get("entry-timestamp").value = localTimestamp(Date.now());
     get("entry-timestamp").max = localTimestamp(Date.now());
     get("entry-panel").hidden = false;
+    setStreamRunning(false, "SIMULATED preview paused during manual entry. Restart it when ready.");
     get("open-entry").setAttribute("aria-expanded", "true");
     get("entry-panel").scrollIntoView({ block: "start" });
     selector.focus({ preventScroll: true });
@@ -680,6 +889,7 @@
       return;
     }
     readings.push(reading);
+    previewReadings = previewReadings.filter((preview) => preview.indicator !== indicator.id);
     saveReadings();
     renderCards(now);
     get("demo-announcement").textContent = `SIMULATED ${indicator.label} measurement logged. Cards use the latest timestamp, not entry order.`;
@@ -687,6 +897,8 @@
   });
 
   get("test-deviation").addEventListener("click", () => {
+    setStreamRunning(false, "SIMULATED preview paused for the deviation test.");
+    previewReadings = previewReadings.filter((reading) => reading.indicator !== "heart-rate");
     const indicator = indicatorById.get("heart-rate");
     readings.push({
       indicator: indicator.id, value: indicator.baseline.value * 1.25,
@@ -698,6 +910,10 @@
     get("demo-announcement").textContent = "SIMULATED Heart Rate deviation inserted: +25% from the fixed personal baseline. This is not a diagnosis.";
   });
   get("reset-demo").addEventListener("click", () => {
+    setStreamRunning(false);
+    previewReadings = [];
+    previewFrame = 0;
+    get("packet-log").replaceChildren(element("li", "packet-empty", "Preview reset. Step a frame or start the SIMULATED stream."));
     readings = createDemo(Date.now());
     storageWarning = "";
     saveReadings();
@@ -712,6 +928,13 @@
       renderHazardAssociations();
     });
   }
+  get("indicator-grid").addEventListener("click", (event) => {
+    if (!event.target.closest('a.related-badge[href="#hazard-wide-records"]')) return;
+    const evidence = get("hazard-wide-records");
+    if (evidence.hidden) return;
+    evidence.open = true;
+    evidence.focus({ preventScroll: true });
+  });
   for (const control of zoneControls) {
     control.addEventListener("click", () => selectZone(control.dataset.zone));
     if (control.getAttribute("role") === "button") {
@@ -732,12 +955,23 @@
   logo.addEventListener("error", showLogoPlaceholder, { once: true });
   if (logo.complete && logo.naturalWidth === 0) showLogoPlaceholder();
 
+  // Anchor targets must clear the safety bar even when its text wraps.
+  new ResizeObserver(([entry]) => {
+    document.documentElement.style.setProperty("--compliance-height", `${entry.target.getBoundingClientRect().height}px`);
+  }).observe(document.querySelector(".compliance-bar"));
+
+  initializeTelemetry();
   renderSources();
   saveReadings();
   renderCards(Date.now());
+  if (window.location.hash === "#hazard-wide-records" && !get("hazard-wide-records").hidden) {
+    get("hazard-wide-records").open = true;
+  }
   for (const id of ["open-entry", "test-deviation", "reset-demo"]) get(id).disabled = false;
   for (const button of hazardButtons) button.disabled = false;
   for (const control of zoneControls) if (control instanceof HTMLButtonElement) control.disabled = false;
+  setStreamRunning(!reducedMotion.matches);
+  if (streamRunning) scheduleReplay(900);
   const refreshStatuses = () => {
     for (const indicator of indicators) updateCardStatus(indicator, historyFor(indicator.id).at(-1) || null, Date.now());
   };

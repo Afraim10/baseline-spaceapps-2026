@@ -4,7 +4,21 @@
 
 BASELINE is a static browser health-monitoring prototype for NASA Space Apps 2026, not a game. It includes six baseline-first cards, native SVG sparklines, collapsed timestamped data tables, validated measurement entry, a persistent SIMULATED seven-day demo, hazard-wide association records, and an inline body schematic. The interface uses the DESIGN.md tokens.
 
+The `polish-v2` testing branch now uses an experimental **Orbital Observatory** design: a dark cosmic backdrop, procedural stars, drifting nebulae, a floating planet with rotating orbital rings, luminous channel panels, scroll reveals, and animated sample arrivals. The earlier Clinical Mission Control pass remains documented in `DESIGN.md`. The interface remains a health-monitoring prototype, not a game or real sensor console.
+
 Open `index.html` directly in a browser. No server, build step, package installation, libraries, or network connection is required. Classic scripts load local data into `window.BASELINE`; no modules, fetch calls, or external font downloads are used.
+
+## Experimental Replay
+
+- All six indicators receive a new **SIMULATED** preview frame every five seconds, replaying the existing seven-day fixture values with new timestamps. Replay starts automatically unless reduced motion is enabled.
+- **Pause SIMULATED stream** stops incoming frames. **Step one frame** pauses continuous replay and advances every channel once.
+- Preview samples stay in memory, capped at 144 samples across the six channels. They are excluded from `baseline.demo.v1`; saved demo/manual data and the storage format are unchanged.
+- Values, timestamps, statuses, recent-sample charts, and historical timelines update without recreating evidence links or focused table regions. The recent chart uses sample order, not a time axis; the separate seven-day timeline retains actual timestamp spacing.
+- Manual entry locks replay controls and pauses the stream. Saving excludes preview readings for the entered indicator so its synthetic manual entry remains inspectable. Deviation testing also pauses replay and clears the Heart Rate preview before inserting the existing test.
+- **Pause effects** stops the decorative scene and packet animations. OS reduced motion disables effects and automatic replay; explicit frame stepping remains available. Hidden tabs suspend the scene and replay without a catch-up burst.
+- The six orbital beacons focus the corresponding indicator cards. Overview, Monitor, and Evidence navigation follows the visible sections, with a scroll-progress indicator.
+
+`cosmos.css` contains the experimental visual layer; `space.js` owns the original canvas scene, scroll enhancements, and visual arrival feedback. System font fallbacks are used, including Bahnschrift where available. No NASA logos, reference-site artwork, external star catalogues, or real cosmological measurements are used.
 
 The always-visible compliance bar reads "PROTOTYPE &mdash; NOT MEDICAL ADVICE" and "SIMULATED DATA". The privacy notice reads "Do not enter real personal health data."
 
@@ -18,7 +32,7 @@ The geometric markup from `body-schematic2.svg` is inline in `index.html`, not l
 
 Hazard associations come only from display-eligible, explicitly verified `hazard-link` claims with an exact matching hazard ID. There is no hardcoded indicator/hazard mapping. **All hazards** displays the explicit `hazard: "all"` scope, not an aggregation or wildcard for other scopes. Unlinked cards remain visible without a hazard badge; if the selected scope has no verified links, the lens shows "No source-verified associations loaded for this hazard."
 
-Hazard-wide claims with `indicator: "all"` or `indicator: "none"` appear in a panel inside the selected hazard bar, including their tier, provenance note, and source citation. `all` also gives every indicator card a tier badge linking to that shared evidence panel; `none` never badges a card. Card-specific guidance and reference sections continue to require an exact card indicator ID.
+Hazard-wide claims with `indicator: "all"` or `indicator: "none"` appear in a native disclosure inside the selected hazard bar, including their tier, provenance note, and source citation. The collapsed summary shows the record count and relationship tiers. `all` also gives every indicator card a tier badge that opens and focuses the shared evidence; `none` never badges a card. Card-specific guidance and reference sections continue to require an exact card indicator ID.
 
 Linked cards show "RELATED TO SELECTED HAZARD" with the relationship tier, claim text, source title link, and locator. Interpretation links additionally show "Interface association &mdash; not stated by the cited source." and the author's required note. The Radiation view always displays the requested **BASELINE design note** that the six indicators do not measure radiation exposure. This hardcoded interface caution is separate from the claims inventory and never creates an association.
 
@@ -26,7 +40,7 @@ Linked cards show "RELATED TO SELECTED HAZARD" with the relationship tier, claim
 
 Demo history is saved under the versioned `localStorage` key `baseline.demo.v1`. Storage access and JSON loading are guarded by try/catch, with in-memory fallback and a visible notice when storage is unavailable. Invalid saved data is replaced with a fresh demo. Do not enter real personal health data; browser storage is not a private medical record.
 
-`status.js` exposes pure functions through `window.BASELINE.status`. `MAX_READING_AGE_MS` is 48 hours: exactly 48 hours remains recent, anything older is neutral. Missing readings, missing baselines, and differing contexts never default to Green. Status freshness is rechecked every minute and when the window regains focus. Charts show a rolling seven-day window at render time; backdated entries do not replace a later current reading.
+`status.js` exposes pure functions through `window.BASELINE.status`. `MAX_READING_AGE_MS` is 48 hours: exactly 48 hours remains recent, anything older is neutral. Missing readings, missing baselines, and differing contexts never default to Green. Status freshness is rechecked every minute and when the window regains focus. Historical charts show a rolling seven-day window; the recent preview chart shows up to 16 samples with explicit sequence-axis labeling. Backdated entries do not replace a later current reading.
 
 ## Offline Tests
 
@@ -66,7 +80,7 @@ Runtime claim validation also accepts `all` and `none` indicator IDs. Undefined 
 
 `basis` is `source` or `interpretation`; `note` is a string, normally empty for source-based claims. Every interpretation needs a non-empty note, including interpretation claims outside the hazard lens. Verification of underlying source material does not turn an author interpretation into a relationship stated by that source. Interpretation notes and provenance warnings remain visible beside the relevant claim.
 
-Each card's four guidance sections render only explicitly verified claims matching its indicator and section. Claims need a registered, unambiguous source ID, a source title and safe link, a locator, a verification date, and valid routing/basis/note metadata; invalid metadata blocks display and appears in dev lint. Every displayed claim includes the source title as a link and its locator. Empty sections show "No source-verified guidance loaded for this section (left empty rather than invented)."
+Each card's four guidance sections are grouped in the native **Evidence & guidance** disclosure and render only explicitly verified claims matching its indicator and section. Claims need a registered, unambiguous source ID, a source title and safe link, a locator, a verification date, and valid routing/basis/note metadata; invalid metadata blocks display and appears in dev lint. Every displayed claim includes the source title as a link and its locator. Empty sections show "No source-verified guidance loaded for this section (left empty rather than invented)." Demo configuration numbers sit in a separate disclosure while the illustrative-threshold warning stays visible. Open disclosures and focused summaries/table regions are preserved when cards rerender.
 
 The collapsed "General adult reference &mdash; not spaceflight-validated." panel renders only verified `reference` claims. It shows "No verified reference values loaded." when empty. No general-adult reference numbers are hardcoded. The Sources & verification panel counts verification flags and lists sources used by display-eligible verified claims. Passing lint or tests does not verify scientific accuracy.
 
@@ -78,6 +92,10 @@ AI assistance was used for:
 - **ChatGPT:** design specification and SVGs.
 - **Gemini:** planning and draft claims.
 - **Claude:** review.
+
+The Clinical Mission Control UI implementation and one-off browser verification were also AI-assisted using Kilo.
+
+The experimental Orbital Observatory scene, replay UI, animations, and browser checks were AI-assisted using Kilo. All celestial graphics are original concept artwork, not scientific visualizations or imported NASA assets.
 
 AI-generated code and documentation require author review. `body-schematic2.svg` was AI-generated; its drawing is used inline with a visible AI-generated label and interface-grouping disclaimer. Per-file attribution headers have been removed. The project emblem is designated AI-generated and labeled accordingly. AI assistance and passing tests do not verify scientific content; draft claims require manual source checking before verification. No NASA logos are used.
 

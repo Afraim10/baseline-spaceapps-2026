@@ -6,13 +6,22 @@
     <title>BASELINE</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="cosmos.css">
     <script src="data/sources.js" defer></script>
     <script src="data/claims.js" defer></script>
     <script src="status.js" defer></script>
     <script src="app.js" defer></script>
+    <script src="space.js" defer></script>
   </head>
-  <body>
+  <body class="orbital-theme" data-stream="paused">
     <a class="skip-link" href="#main-content">Skip to health monitor</a>
+    <div class="space-background" aria-hidden="true">
+      <canvas id="starfield"></canvas>
+      <div class="nebula nebula-violet"></div>
+      <div class="nebula nebula-cyan"></div>
+      <div class="space-grid"></div>
+    </div>
+    <div class="page-progress" aria-hidden="true"><span id="page-progress-fill"></span></div>
 
     <div class="compliance-bar" role="note">
       <div class="page-wrap compliance-inner">
@@ -30,30 +39,92 @@
         </div>
         <div class="brand-copy">
           <h1>BASELINE</h1>
-          <p class="metadata">Personal baseline first &middot; AI-generated emblem</p>
+          <p class="metadata"><span>Personal baseline first</span><span>AI-generated emblem</span></p>
         </div>
       </div>
+      <nav class="site-navigation" aria-label="Primary navigation">
+        <a href="#mission-overview" class="is-current">Overview</a>
+        <a href="#monitor-console">Monitor</a>
+        <a href="#sources-verification">Evidence</a>
+      </nav>
       <div class="header-actions">
-        <a href="#sources-verification">Sources &amp; verification</a>
+        <button id="toggle-effects" class="button-quiet" type="button" aria-pressed="false" disabled>Enable effects</button>
         <button id="open-entry" class="button-primary" type="button"
-                aria-controls="entry-panel" aria-expanded="false" disabled>Log a health measurement</button>
+                aria-controls="entry-panel" aria-expanded="false" disabled>
+          <svg class="button-icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Log a health measurement</span>
+        </button>
       </div>
     </header>
 
     <main id="main-content" class="page-wrap" tabindex="-1">
-      <p class="privacy-notice">Do not enter real personal health data.</p>
-
-      <div class="demo-toolbar">
-        <p class="metadata">SIMULATED seven-day demo &middot; Fixed personal baselines</p>
-        <div class="demo-actions">
-          <button id="test-deviation" type="button" disabled>Test deviation</button>
-          <button id="reset-demo" type="button" disabled>Reset demo</button>
+      <section id="mission-overview" class="mission-hero" aria-labelledby="mission-title" data-reveal>
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="signal-dot" aria-hidden="true"></span> BASELINE / ORBITAL OBSERVATORY</p>
+          <h2 id="mission-title" class="mission-title">Personal baseline.<br><span>Cosmic perspective.</span></h2>
+          <p class="hero-lead">Explore human signals through a space-inspired monitoring console. Watch synthetic readings arrive, trace their changes, and inspect the evidence behind the interface.</p>
+          <div class="hero-actions">
+            <a class="button-primary" href="#monitor-console">Enter the monitor <span aria-hidden="true">&searr;</span></a>
+            <button class="button-secondary" type="button" data-stream-toggle aria-pressed="false" disabled>Start SIMULATED stream</button>
+          </div>
+          <p class="hero-safety">SIMULATED fixture replay. No sensors, real patients, or live spaceflight measurements are connected.</p>
+          <dl class="mission-stats">
+            <div><dt>Browser session</dt><dd id="session-clock">00:00</dd></div>
+            <div><dt>Preview frames</dt><dd id="hero-frame-count">000</dd></div>
+            <div><dt>Indicator channels</dt><dd id="hero-channel-count">--</dd></div>
+          </dl>
         </div>
-      </div>
-      <p id="storage-status" class="metadata" role="status">Demo storage is not initialized.</p>
-      <p id="demo-announcement" class="demo-announcement" role="status" aria-live="polite"></p>
+        <div class="orbit-stage">
+          <div class="orbit-art" aria-hidden="true">
+            <div class="orbit-halo"></div>
+            <div class="orbit-ring ring-outer"></div>
+            <div class="orbit-ring ring-inner"></div>
+            <div class="orbit-ring ring-equator"></div>
+            <div class="planet-disc"><div class="planet-texture"></div></div>
+            <svg class="orbit-crosshair" viewBox="0 0 600 600" focusable="false">
+              <path d="M300 20v60M300 520v60M20 300h60M520 300h60M88 88l34 34M478 478l34 34M88 512l34-34M478 122l34-34"/>
+              <circle cx="300" cy="300" r="267"/><circle cx="300" cy="300" r="224"/>
+            </svg>
+          </div>
+          <div class="orbit-readout" aria-hidden="true"><span>LOCAL / SYNTHETIC</span><strong id="orbit-frame">FRAME 000</strong><span>accelerated fixture replay</span></div>
+          <div id="orbit-channels" class="orbit-channels" role="group" aria-label="View indicator channels"></div>
+          <p class="orbit-caption">AI-generated concept visualization, not a real orbital model.</p>
+        </div>
+      </section>
+
+      <dl id="channel-manifest" class="channel-manifest" aria-label="Latest SIMULATED channel readings"></dl>
+
+      <section class="stream-console" aria-labelledby="stream-heading" data-reveal>
+        <div class="stream-intro">
+          <p class="eyebrow">LOCAL DATA LINK / SIMULATED</p>
+          <h2 id="stream-heading">A living signal stream.</h2>
+          <p class="metadata">Accelerated replay of the existing synthetic fixtures. Preview samples are not saved; manual demo entries still use browser storage.</p>
+        </div>
+        <div class="stream-controls">
+          <button class="button-primary" type="button" data-stream-toggle aria-pressed="false" disabled>Start SIMULATED stream</button>
+          <button id="step-stream" type="button" disabled>Step one frame <span aria-hidden="true">&rarr;</span></button>
+          <p id="stream-status" class="metadata" role="status">Preview paused. Enable JavaScript to receive SIMULATED samples.</p>
+        </div>
+        <div class="packet-heading"><span><span class="signal-dot" aria-hidden="true"></span> SIMULATED packet activity</span><span id="stream-frame-count">FRAME 000</span></div>
+        <ol id="packet-log" class="packet-log" aria-label="Recent SIMULATED samples" aria-live="off"><li class="packet-empty">Waiting for a preview frame. No sensor connection is present.</li></ol>
+        <noscript>The monitoring preview requires JavaScript. No real readings are provided.</noscript>
+      </section>
+
+      <section class="monitor-toolbar" aria-label="SIMULATED demo controls and privacy">
+        <p class="privacy-notice">Do not enter real personal health data.</p>
+        <div class="demo-toolbar">
+          <p class="metadata">SIMULATED seven-day demo &middot; Fixed personal baselines</p>
+          <div class="demo-actions">
+            <button id="test-deviation" type="button" disabled>Test deviation</button>
+            <button id="reset-demo" type="button" disabled>Reset demo</button>
+          </div>
+        </div>
+        <p id="storage-status" class="metadata" role="status">Demo storage is not initialized.</p>
+        <p id="demo-announcement" class="demo-announcement" role="status" aria-live="polite"></p>
+      </section>
 
       <section id="entry-panel" class="entry-panel" aria-labelledby="entry-heading" hidden>
+        <p class="eyebrow">SIMULATED entry</p>
         <h2 id="entry-heading">Log a health measurement</h2>
         <p>SIMULATED input only. Do not enter real personal health data.</p>
         <p id="entry-limits-note" class="metadata">Validation uses entry limits, not clinical thresholds. Values are rejected, never clamped.</p>
@@ -88,10 +159,15 @@
         </form>
       </section>
 
-      <section class="hazard-bar" aria-labelledby="hazard-heading">
+      <section id="monitor-console" class="monitor-console" aria-labelledby="monitor-title">
+      <div class="console-heading" data-reveal>
+        <div><p class="eyebrow">PERSONAL BASELINE FIRST / SIMULATED</p><h2 id="monitor-title">Human signals.<br><span>Mission perspective.</span></h2></div>
+        <p class="metadata">Configured deviations, not diagnoses. Inspect each channel, its synthetic sample sequence, and the source-verified context.</p>
+      </div>
+      <section class="hazard-bar" aria-labelledby="hazard-heading" data-reveal>
         <div class="section-heading">
           <h2 id="hazard-heading">Hazard lens</h2>
-          <p id="hazard-note" class="metadata">Associations require verified hazard-link records.</p>
+          <p id="hazard-note" class="metadata">Verified association records only.</p>
         </div>
         <div class="hazard-options" role="group" aria-label="Hazard lens selection"
              aria-describedby="hazard-note">
@@ -109,10 +185,13 @@
                   aria-pressed="false" disabled>Hostile Closed Environments</button>
         </div>
         <p id="hazard-association-status" class="metadata" role="status" aria-live="polite">No source-verified associations loaded for this hazard.</p>
-        <section id="hazard-wide-records" class="hazard-links hazard-wide-records" aria-labelledby="hazard-wide-heading" tabindex="-1" hidden>
-          <h3 id="hazard-wide-heading">Hazard-wide association records</h3>
+        <details id="hazard-wide-records" class="hazard-links hazard-wide-records" aria-labelledby="hazard-wide-heading" tabindex="-1" hidden>
+          <summary>
+            <span id="hazard-wide-heading">Hazard-wide association records</span>
+            <span id="hazard-wide-context" class="metadata"></span>
+          </summary>
           <ul id="hazard-wide-claims" class="claim-list"></ul>
-        </section>
+        </details>
         <aside id="radiation-design-note" class="design-note" aria-labelledby="radiation-note-heading" hidden>
           <h3 id="radiation-note-heading">BASELINE design note</h3>
           <p>The six indicators do not measure radiation exposure.</p>
@@ -120,63 +199,70 @@
       </section>
 
       <div class="dashboard-grid">
-        <aside class="body-panel" aria-labelledby="body-heading">
+        <aside class="body-panel" aria-labelledby="body-heading" data-reveal>
+          <p class="eyebrow">INTERFACE GROUPINGS</p>
           <h2 id="body-heading">Body explorer</h2>
           <p id="body-grouping-note" class="metadata">Interface grouping, not an anatomical claim.</p>
-          <svg id="body-schematic" xmlns="http://www.w3.org/2000/svg"
-               viewBox="0 0 240 520" role="group" aria-labelledby="body-title body-desc">
-            <title id="body-title">BASELINE body schematic</title>
-            <desc id="body-desc">Geometric human silhouette with three selectable interface groupings. Use the zones or the equivalent buttons to emphasize indicator cards; these groupings are not anatomical claims.</desc>
-            <g id="body-base" class="silhouette" aria-hidden="true">
-              <path d="M183 115 C193 115 201 123 202 136 C204 160 208 184 212 208 C214 220 217 230 217 238 C217 246 209 250 205 246 C201 242 202 234 200 226 C196 208 190 190 187 172 C185 160 183 148 183 134 C183 127 183 121 183 115 Z"/>
-              <path d="M57 115 C47 115 39 123 38 136 C36 160 32 184 28 208 C26 220 23 230 23 238 C23 246 31 250 35 246 C39 242 38 234 40 226 C44 208 50 190 53 172 C55 160 57 148 57 134 C57 127 57 121 57 115 Z"/>
-              <path d="M123 306 L162 304 C167 340 167 368 163 400 C160 424 162 446 155 472 L155 492 C165 493 172 499 173 507 L137 507 L137 472 C135 448 131 424 130 400 C128 372 124 340 123 306 Z"/>
-              <path d="M117 306 L78 304 C73 340 73 368 77 400 C80 424 78 446 85 472 L85 492 C75 493 68 499 67 507 L103 507 L103 472 C105 448 109 424 110 400 C112 372 116 340 117 306 Z"/>
-              <path d="M137 98 C146 102 160 104 172 109 C179 112 180 120 179 128 C178 148 174 170 168 190 C165 203 163 214 164 228 C165 244 172 252 173 268 C174 284 168 298 158 308 C148 312 132 318 120 318 C108 318 92 312 82 308 C72 298 66 284 67 268 C68 252 75 244 76 228 C77 214 75 203 72 190 C66 170 62 148 61 128 C60 120 61 112 68 109 C80 104 94 102 103 98 Z"/>
-            </g>
-            <g id="zone-neuro" class="zone" data-zone="neuro" role="button" tabindex="0" aria-pressed="false"
-               aria-label="Head / Neuro interface grouping: Sleep Hours and Mood." aria-describedby="body-grouping-note">
-              <title>Interface grouping, not an anatomical claim.</title>
-              <path d="M120 16 C139 16 151 30 151 50 C151 64 146 74 139 80 C137 83 136 87 136 92 L137 98 L103 98 L104 92 C104 87 103 83 101 80 C94 74 89 64 89 50 C89 30 101 16 120 16 Z"/>
-              <path class="detail" d="M119 30 C108 28 100 35 101 44 C96 49 98 58 106 60 C109 66 116 67 119 63 Z"/>
-              <path class="detail" d="M121 30 C132 28 140 35 139 44 C144 49 142 58 134 60 C131 66 124 67 121 63 Z"/>
-              <path class="detail" d="M105 44 C109 42 112 44 113 47 M135 44 C131 42 128 44 127 47"/>
-            </g>
-            <g id="zone-cardio" class="zone" data-zone="cardio" role="button" tabindex="0" aria-pressed="false"
-               aria-label="Thorax / Cardio interface grouping: Blood Pressure and Heart Rate." aria-describedby="body-grouping-note">
-              <title>Interface grouping, not an anatomical claim.</title>
-              <path d="M137 98 C146 102 160 104 172 109 C179 112 180 120 179 128 C178 148 174 170 168 190 Q 120 174 72 190 C66 170 62 148 61 128 C60 120 61 112 68 109 C80 104 94 102 103 98 Z"/>
-              <path class="detail" d="M104 120 C94 118 82 126 80 146 C79 160 82 172 90 174 C98 175 104 170 104 160 Z"/>
-              <path class="detail" d="M141 122 C148 118 158 126 160 146 C161 160 158 172 150 174 C144 175 143 170 143 160 Z"/>
-              <path class="detail" d="M124 168 C112 160 106 152 108 144 C110 137 119 136 124 143 C129 136 138 137 140 144 C142 152 136 160 124 168 Z"/>
-              <path class="detail" d="M112 152 H118 L121 146 L125 159 L128 150 H136"/>
-            </g>
-            <g id="zone-systemic" class="zone" data-zone="systemic" role="button" tabindex="0" aria-pressed="false"
-               aria-label="Systemic / Metabolic interface grouping: Blood Glucose and Body Temperature." aria-describedby="body-grouping-note">
-              <title>Interface grouping, not an anatomical claim.</title>
-              <path d="M168 190 C165 203 163 214 164 228 C165 244 172 252 173 268 C174 284 168 298 158 308 C148 312 132 318 120 318 C108 318 92 312 82 308 C72 298 66 284 67 268 C68 252 75 244 76 228 C77 214 75 203 72 190 Q 120 174 168 190 Z"/>
-              <path class="detail" d="M122 184 V258 M122 258 C118 272 110 284 106 298 M122 258 C126 272 134 284 138 298"/>
-              <path class="detail" d="M100 212 C96 219 94 223 94 227 C94 231 97 234 100 234 C103 234 106 231 106 227 C106 223 104 219 100 212 Z"/>
-              <rect class="detail" x="138" y="210" width="5" height="18" rx="2.5"/>
-              <circle class="detail" cx="140.5" cy="233" r="5"/>
-              <circle class="detail-fill" cx="140.5" cy="233" r="2.5"/>
-              <path class="detail" d="M84 272 C90 294 104 302 120 302 C136 302 150 294 156 272"/>
-            </g>
-          </svg>
-          <p class="metadata">AI-generated schematic</p>
-          <div class="zone-controls" role="group" aria-label="Body interface groupings" aria-describedby="body-grouping-note">
-            <button type="button" data-zone="neuro" aria-pressed="false" disabled>
-              <span>Head / Neuro</span><span class="metadata">Sleep Hours, Mood</span>
-            </button>
-            <button type="button" data-zone="cardio" aria-pressed="false" disabled>
-              <span>Thorax / Cardio</span><span class="metadata">Blood Pressure, Heart Rate</span>
-            </button>
-            <button type="button" data-zone="systemic" aria-pressed="false" disabled>
-              <span>Systemic / Metabolic</span><span class="metadata">Blood Glucose, Body Temperature</span>
-            </button>
+          <div class="body-explorer">
+            <figure class="body-figure">
+              <svg id="body-schematic" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 240 520" role="group" aria-labelledby="body-title body-desc">
+                <title id="body-title">BASELINE body schematic</title>
+                <desc id="body-desc">Geometric human silhouette with three selectable interface groupings. Use the zones or the equivalent buttons to emphasize indicator cards; these groupings are not anatomical claims.</desc>
+                <g id="body-base" class="silhouette" aria-hidden="true">
+                  <path d="M183 115 C193 115 201 123 202 136 C204 160 208 184 212 208 C214 220 217 230 217 238 C217 246 209 250 205 246 C201 242 202 234 200 226 C196 208 190 190 187 172 C185 160 183 148 183 134 C183 127 183 121 183 115 Z"/>
+                  <path d="M57 115 C47 115 39 123 38 136 C36 160 32 184 28 208 C26 220 23 230 23 238 C23 246 31 250 35 246 C39 242 38 234 40 226 C44 208 50 190 53 172 C55 160 57 148 57 134 C57 127 57 121 57 115 Z"/>
+                  <path d="M123 306 L162 304 C167 340 167 368 163 400 C160 424 162 446 155 472 L155 492 C165 493 172 499 173 507 L137 507 L137 472 C135 448 131 424 130 400 C128 372 124 340 123 306 Z"/>
+                  <path d="M117 306 L78 304 C73 340 73 368 77 400 C80 424 78 446 85 472 L85 492 C75 493 68 499 67 507 L103 507 L103 472 C105 448 109 424 110 400 C112 372 116 340 117 306 Z"/>
+                  <path d="M137 98 C146 102 160 104 172 109 C179 112 180 120 179 128 C178 148 174 170 168 190 C165 203 163 214 164 228 C165 244 172 252 173 268 C174 284 168 298 158 308 C148 312 132 318 120 318 C108 318 92 312 82 308 C72 298 66 284 67 268 C68 252 75 244 76 228 C77 214 75 203 72 190 C66 170 62 148 61 128 C60 120 61 112 68 109 C80 104 94 102 103 98 Z"/>
+                </g>
+                <g id="zone-neuro" class="zone" data-zone="neuro" role="button" tabindex="0" aria-pressed="false"
+                   aria-label="Head / Neuro interface grouping: Sleep Hours and Mood." aria-describedby="body-grouping-note">
+                  <title>Interface grouping, not an anatomical claim.</title>
+                  <path d="M120 16 C139 16 151 30 151 50 C151 64 146 74 139 80 C137 83 136 87 136 92 L137 98 L103 98 L104 92 C104 87 103 83 101 80 C94 74 89 64 89 50 C89 30 101 16 120 16 Z"/>
+                  <path class="detail" d="M119 30 C108 28 100 35 101 44 C96 49 98 58 106 60 C109 66 116 67 119 63 Z"/>
+                  <path class="detail" d="M121 30 C132 28 140 35 139 44 C144 49 142 58 134 60 C131 66 124 67 121 63 Z"/>
+                  <path class="detail" d="M105 44 C109 42 112 44 113 47 M135 44 C131 42 128 44 127 47"/>
+                </g>
+                <g id="zone-cardio" class="zone" data-zone="cardio" role="button" tabindex="0" aria-pressed="false"
+                   aria-label="Thorax / Cardio interface grouping: Blood Pressure and Heart Rate." aria-describedby="body-grouping-note">
+                  <title>Interface grouping, not an anatomical claim.</title>
+                  <path d="M137 98 C146 102 160 104 172 109 C179 112 180 120 179 128 C178 148 174 170 168 190 Q 120 174 72 190 C66 170 62 148 61 128 C60 120 61 112 68 109 C80 104 94 102 103 98 Z"/>
+                  <path class="detail" d="M104 120 C94 118 82 126 80 146 C79 160 82 172 90 174 C98 175 104 170 104 160 Z"/>
+                  <path class="detail" d="M141 122 C148 118 158 126 160 146 C161 160 158 172 150 174 C144 175 143 170 143 160 Z"/>
+                  <path class="detail" d="M124 168 C112 160 106 152 108 144 C110 137 119 136 124 143 C129 136 138 137 140 144 C142 152 136 160 124 168 Z"/>
+                  <path class="detail" d="M112 152 H118 L121 146 L125 159 L128 150 H136"/>
+                </g>
+                <g id="zone-systemic" class="zone" data-zone="systemic" role="button" tabindex="0" aria-pressed="false"
+                   aria-label="Systemic / Metabolic interface grouping: Blood Glucose and Body Temperature." aria-describedby="body-grouping-note">
+                  <title>Interface grouping, not an anatomical claim.</title>
+                  <path d="M168 190 C165 203 163 214 164 228 C165 244 172 252 173 268 C174 284 168 298 158 308 C148 312 132 318 120 318 C108 318 92 312 82 308 C72 298 66 284 67 268 C68 252 75 244 76 228 C77 214 75 203 72 190 Q 120 174 168 190 Z"/>
+                  <path class="detail" d="M122 184 V258 M122 258 C118 272 110 284 106 298 M122 258 C126 272 134 284 138 298"/>
+                  <path class="detail" d="M100 212 C96 219 94 223 94 227 C94 231 97 234 100 234 C103 234 106 231 106 227 C106 223 104 219 100 212 Z"/>
+                  <rect class="detail" x="138" y="210" width="5" height="18" rx="2.5"/>
+                  <circle class="detail" cx="140.5" cy="233" r="5"/>
+                  <circle class="detail-fill" cx="140.5" cy="233" r="2.5"/>
+                  <path class="detail" d="M84 272 C90 294 104 302 120 302 C136 302 150 294 156 272"/>
+                </g>
+              </svg>
+              <figcaption class="metadata">AI-generated schematic</figcaption>
+            </figure>
+            <div class="body-navigation">
+              <div class="zone-controls" role="group" aria-label="Body interface groupings" aria-describedby="body-grouping-note">
+                <button type="button" data-zone="neuro" aria-pressed="false" disabled>
+                  <span>Head / Neuro</span><span class="metadata">Sleep Hours, Mood</span>
+                </button>
+                <button type="button" data-zone="cardio" aria-pressed="false" disabled>
+                  <span>Thorax / Cardio</span><span class="metadata">Blood Pressure, Heart Rate</span>
+                </button>
+                <button type="button" data-zone="systemic" aria-pressed="false" disabled>
+                  <span>Systemic / Metabolic</span><span class="metadata">Blood Glucose, Body Temperature</span>
+                </button>
+              </div>
+              <p id="zone-selection-status" class="metadata" role="status">Select a grouping; select it again to clear its emphasis.</p>
+              <div id="zone-indicator-actions" class="zone-indicator-actions" role="group" aria-label="View indicators in the selected grouping" hidden></div>
+            </div>
           </div>
-          <p id="zone-selection-status" class="metadata" role="status">Select a grouping; select it again to clear its emphasis.</p>
-          <div id="zone-indicator-actions" class="zone-indicator-actions" role="group" aria-label="View indicators in the selected grouping" hidden></div>
         </aside>
 
         <section class="indicators" aria-labelledby="indicators-heading">
@@ -253,8 +339,10 @@
           </div>
         </section>
       </div>
+      </section>
 
-      <section id="sources-verification" class="sources-panel" aria-labelledby="sources-heading">
+      <section id="sources-verification" class="sources-panel" aria-labelledby="sources-heading" data-reveal>
+        <p class="eyebrow">Evidence briefing</p>
         <h2 id="sources-heading">Sources &amp; verification</h2>
         <p>Claims appear only after manual source verification. Metadata checks do not establish scientific accuracy.</p>
         <dl class="source-counts">
@@ -282,6 +370,9 @@
       <p id="shell-note" class="metadata">Body groupings organize the interface. Hazard badges require verified association records and do not change baseline deviation statuses.</p>
     </main>
 
-    <footer class="page-wrap site-footer">Deviation is not diagnosis. No medical assessment or live measurements are provided. <a href="tests.html">Offline status tests</a></footer>
+    <footer class="page-wrap site-footer">
+      <p>Deviation is not diagnosis. SIMULATED preview only; no medical assessment or real sensor measurements are provided.</p>
+      <a href="tests.html">Offline status tests <span aria-hidden="true">&rarr;</span></a>
+    </footer>
   </body>
 </html>
